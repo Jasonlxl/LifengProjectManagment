@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://rm-m5eema6y7o73ku0j0zo.mysql.rds.aliyuncs.com:3306/lifengpro?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&zeroDateTimeBehavior=CONVERT_TO_NULL
+    url: jdbc:mysql://rm-m5eema6y7o73ku0j0zo.mysql.rds.aliyuncs.com:3306/lifengpro?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
     username: lifengpro
     password: sdlifeng123@
     driver-class-name: com.mysql.jdbc.Driver

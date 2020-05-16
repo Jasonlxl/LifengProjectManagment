@@ -6,7 +6,7 @@ spring:
     url: jdbc:mysql://rm-m5eema6y7o73ku0j0zo.mysql.rds.aliyuncs.com:3306/lifengpro?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
     username: lifengpro
     password: sdlifeng123@
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     tomcat:
       max-idle: 10
       max-wait: 10000

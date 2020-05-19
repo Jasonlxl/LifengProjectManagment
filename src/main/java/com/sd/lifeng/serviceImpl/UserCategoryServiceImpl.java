@@ -1,5 +1,7 @@
 package com.sd.lifeng.serviceImpl;
 
+import com.sd.lifeng.dao.UserDAO;
+import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.service.IUserCategoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,27 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private UserDAO userDAO;
+
+    /**
+     * 登录校验
+     * @param userName  用户名
+     * @param password  密码
+     * @return
+     */
+    public boolean login(String userName,String password){
+        boolean flag = true;
+        UserDO userDO=userDAO.getUserByNamePassword(userName,password);
+        if(userDO == null){
+            return false;
+        }
+
+        //生成jwt
+
+        return flag;
+    }
+
     /*
     密码检查
      */
@@ -36,5 +59,10 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
             return false;
         }
 
+    }
+
+    @Override
+    public UserDO findUserById(int userId) {
+        return userDAO.getUserById(userId);
     }
 }

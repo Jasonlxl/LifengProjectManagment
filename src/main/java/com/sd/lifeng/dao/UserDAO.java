@@ -23,9 +23,22 @@ public class UserDAO {
      * @param password 密码
      * @return
      */
-    public  UserDO getUserByNamePassword(String userName,String password){
+    public UserDO getUserByNamePassword(String userName,String password){
         String sql="select * from pro_users where  telno=? and passwd=? ";
         Object[] params = new Object[] { userName, password};
+        return jdbcTemplate.queryForObject(sql,params,UserDO.class);
+    }
+
+   /**
+    * @Description 根据用户id获取用户信息
+    * @param userId 用户id
+    * @Auther bmr
+    * @Date 2020/5/19 : 8:43 :51
+    * @Return com.sd.lifeng.domain.UserDO
+    */
+    public UserDO getUserById(int userId){
+        String sql="select * from pro_user where id = ?";
+        Object[] params = new Object[] { userId};
         return jdbcTemplate.queryForObject(sql,params,UserDO.class);
     }
 }

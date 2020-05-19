@@ -23,6 +23,7 @@ public class UserCategoryController {
         logger.info("register send into msg :"+req);
         JSONObject response = new JSONObject();
 
+        //todo 编写接受实体  校验用户名密码  生产jwt  返给前端
         //1、验证JWT
 
         //2、验证密码

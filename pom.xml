@@ -102,6 +102,14 @@
 		</dependency>
 		<!--jwt依赖包结束-->
 
+		<!--lombok依赖包开始-->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<!--lombok依赖包结束-->
+
 	</dependencies>
 
 	<build>

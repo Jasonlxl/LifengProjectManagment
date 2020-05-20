@@ -7,7 +7,10 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.domain.UserDO;
+import com.sd.lifeng.enums.ResultCodeEnum;
+import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IUserCategoryService;
+import org.apache.catalina.LifecycleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -34,13 +37,14 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         HandlerMethod handlerMethod=(HandlerMethod) handler;
         Method method=handlerMethod.getMethod();
+        //todo 将这里的异常全部定义成LifengException   捕获这个异常进行处理
 
         //检查需不需要验证token
         if(method.isAnnotationPresent(VerifyToken.class)){
             VerifyToken userLoginToken = method.getAnnotation(VerifyToken.class);
             if(userLoginToken.required()){
                 if(StringUtils.isEmpty(token)){
-                    throw new RuntimeException("该请求没有token,请先获取token!");
+                    throw new LiFengException(ResultCodeEnum.TOKEN_MISS);
                 }
 
                 //获取token中的userId
@@ -48,11 +52,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                 try {
                     userId= JWT.decode(token).getAudience().get(0);
                 }catch (JWTDecodeException e){
-                    throw new RuntimeException("token非法,没有userId!");
+                    throw new LiFengException(ResultCodeEnum.TOKEN_ILLEGAL);
                 }
                 UserDO userDO = userCategoryService.findUserById(Integer.parseInt(userId));
                 if(userDO == null){
-                    throw new RuntimeException("用户不存在，请重新登录!");
+                    throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
                 }
 
                 //验证token
@@ -60,7 +64,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 try {
                     jwtVerifier.verify(token);
                 }catch (JWTVerificationException e){
-                    throw new RuntimeException("校验token发生异常");
+                    throw new LiFengException(ResultCodeEnum.SERVER_EXCEPTION.getCode(),"jwt解析异常");
                 }
                 return true;
             }

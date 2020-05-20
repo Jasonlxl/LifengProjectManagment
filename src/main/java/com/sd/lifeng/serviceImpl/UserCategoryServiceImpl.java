@@ -33,16 +33,8 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
      * @param password  密码
      * @return
      */
-    public boolean login(String userName,String password){
-        boolean flag = true;
-        UserDO userDO=userDAO.getUserByNamePassword(userName,password);
-        if(userDO == null){
-            return false;
-        }
-
-        //生成jwt
-
-        return flag;
+    public UserDO login(String userName,String password){
+        return userDAO.getUserByNamePassword(userName,password);
     }
 
     /*

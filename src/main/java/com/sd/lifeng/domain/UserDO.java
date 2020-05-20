@@ -82,4 +82,19 @@ public class UserDO {
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
+    @Override
+    public String toString() {
+        return "UserDO{" +
+                "id=" + id +
+                ", telno='" + telno + '\'' +
+                ", passwd='" + passwd + '\'' +
+                ", realname='" + realname + '\'' +
+                ", type='" + type + '\'' +
+                ", roleid=" + roleid +
+                ", rolename='" + rolename + '\'' +
+                ", createdate='" + createdate + '\'' +
+                ", remark='" + remark + '\'' +
+                '}';
+    }
 }

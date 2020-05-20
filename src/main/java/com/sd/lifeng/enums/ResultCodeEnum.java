@@ -10,7 +10,12 @@ import lombok.Getter;
 public enum ResultCodeEnum {
     SUCCESS("0","成功"),
     SERVER_EXCEPTION("-1","服务异常"),
-    DATA_BASE_UPDATE_ERROR("10","数据库更新数据失败");
+    PARAM_ERROR("10","参数错误"),
+    TOKEN_MISS("11","token缺失，请传递token"),
+    TOKEN_ILLEGAL("12","token非法"),
+    USER_NOT_EXIST("13","用户不存在"),
+    LOGIN_ERROR("12","用户名密码错误"),
+    DATA_BASE_UPDATE_ERROR("100","数据库更新数据失败");
     private String code;
     private String msg;
 

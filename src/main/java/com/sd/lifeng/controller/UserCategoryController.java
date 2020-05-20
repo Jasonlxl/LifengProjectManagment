@@ -1,49 +1,63 @@
 package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sd.lifeng.config.JwtConfig;
+import com.sd.lifeng.domain.UserDO;
+import com.sd.lifeng.enums.ResultCodeEnum;
+import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IUserCategoryService;
+import com.sd.lifeng.util.ResultVOUtil;
+import com.sd.lifeng.util.TokenUtil;
+import com.sd.lifeng.vo.LoginRequestVO;
+import com.sd.lifeng.vo.ResultVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+@RestController
 @RequestMapping("/lifeng/userctl")
 @CrossOrigin
 public class UserCategoryController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private IUserCategoryService userCat;
+    private IUserCategoryService userCategoryService;
 
-    @ResponseBody
+    @Autowired
+    private JwtConfig jwtConfig;
+
+
     @PostMapping("/login")
-    public String login(@RequestBody JSONObject req){
-        logger.info("register send into msg :"+req);
-        JSONObject response = new JSONObject();
+    public ResultVO login(@RequestBody @Valid  LoginRequestVO loginRequestVO, BindingResult bindingResult){
+        logger.info("register send into msg :"+loginRequestVO);
 
-        //todo 编写接受实体  校验用户名密码  生产jwt  返给前端
-        //1、验证JWT
-
-        //2、验证密码
-        try{
-            if(userCat.passwdCheck(req.getString("passwd"))){
-                response.put("return_code","0");
-                response.put("return_msg","success");
-            }else{
-                response.put("return_code","1");
-                response.put("return_msg","passwd wrong");
-            }
-
-        }catch(Exception e){
-            e.printStackTrace();
-            logger.error("error:"+e.getMessage());
-            response.put("return_code","-1");
-            response.put("return_msg",e.getMessage());
+        if(bindingResult.hasErrors()){
+            logger.error("【登录请求】参数不正确，loginRequestVO={}",loginRequestVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
 
-        logger.info("response:"+response);
-        return response.toString();
+        UserDO userDO =userCategoryService.login(loginRequestVO.getUserName(),loginRequestVO.getPassword());
+        if(userDO == null){
+            throw new LiFengException(ResultCodeEnum.LOGIN_ERROR);
+        }
+
+        //生产jwt
+        String token=TokenUtil.getToken(userDO.getId().toString(), jwtConfig.getKey());
+
+        Map<String,String> map=new HashMap<>();
+        map.put("token",token);
+
+
+        logger.info("response:"+map);
+        return ResultVOUtil.success(map);
     }
 }

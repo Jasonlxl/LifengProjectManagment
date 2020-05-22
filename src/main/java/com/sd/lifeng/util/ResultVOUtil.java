@@ -27,6 +27,18 @@ public class ResultVOUtil {
         return success(null);
     }
 
+    /**
+     * 返回成功
+     * @param msg 成功信息描述
+     * @return
+     */
+    public static ResultVO success(String msg){
+        ResultVO resultVO=new ResultVO();
+        resultVO.setCode("00");
+        resultVO.setMsg(msg);
+        return resultVO;
+    }
+
     public static ResultVO error(String code, String msg){
         ResultVO resultVO=new ResultVO();
         resultVO.setCode(code);

@@ -9,6 +9,7 @@ import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.util.TokenUtil;
 import com.sd.lifeng.vo.LoginRequestVO;
+import com.sd.lifeng.vo.RegisterRequestVO;
 import com.sd.lifeng.vo.ResultVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +35,25 @@ public class UserCategoryController {
     @Autowired
     private JwtConfig jwtConfig;
 
+    @PostMapping("/register")
+    public ResultVO register(@RequestBody @Valid RegisterRequestVO requestVO, BindingResult bindingResult){
+        logger.info("【注册请求】参数列表：{}",requestVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【注册请求】参数不正确，requestVO={}",requestVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        userCategoryService.register(requestVO.getUserName(),requestVO.getPassword(),requestVO.getRealName());
+
+        return ResultVOUtil.success("注册成功，请等待审核");
+    }
+
 
     @PostMapping("/login")
     public ResultVO login(@RequestBody @Valid  LoginRequestVO loginRequestVO, BindingResult bindingResult){
-        logger.info("register send into msg :"+loginRequestVO);
+        logger.info("【登录请求】参数列表：{}",loginRequestVO);
 
         if(bindingResult.hasErrors()){
             logger.error("【登录请求】参数不正确，loginRequestVO={}",loginRequestVO);
@@ -50,7 +66,7 @@ public class UserCategoryController {
             throw new LiFengException(ResultCodeEnum.LOGIN_ERROR);
         }
 
-        //生产jwt
+        //生成jwt
         String token=TokenUtil.getToken(userDO.getId().toString(), jwtConfig.getKey());
 
         Map<String,String> map=new HashMap<>();
@@ -60,4 +76,8 @@ public class UserCategoryController {
         logger.info("response:"+map);
         return ResultVOUtil.success(map);
     }
+
+
+
+
 }

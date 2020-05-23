@@ -19,6 +19,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class AuthInterceptor implements HandlerInterceptor {
 
@@ -37,7 +39,6 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         HandlerMethod handlerMethod=(HandlerMethod) handler;
         Method method=handlerMethod.getMethod();
-        //todo 将这里的异常全部定义成LifengException   捕获这个异常进行处理
 
         //检查需不需要验证token
         if(method.isAnnotationPresent(VerifyToken.class)){
@@ -47,12 +48,23 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new LiFengException(ResultCodeEnum.TOKEN_MISS);
                 }
 
-                //获取token中的userId
+                //获取token中的userId和expireTime
                 String userId;
+                String expireTime;
                 try {
                     userId= JWT.decode(token).getAudience().get(0);
+                    expireTime= JWT.decode(token).getAudience().get(1);
                 }catch (JWTDecodeException e){
                     throw new LiFengException(ResultCodeEnum.TOKEN_ILLEGAL);
+                }
+
+                //判断token是否过期
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime nowTime=LocalDateTime.now();
+                LocalDateTime expireDateTime = LocalDateTime.parse(expireTime, df);
+
+                if(expireDateTime.isBefore(nowTime)){
+                    throw new LiFengException(ResultCodeEnum.TOKEN_INVALID);
                 }
                 UserDO userDO = userCategoryService.findUserById(Integer.parseInt(userId));
                 if(userDO == null){
@@ -72,6 +84,5 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         return true;
     }
-
 
 }

@@ -23,4 +23,16 @@ public enum UserAuditEnum {
         this.value = value;
         this.remark = remark;
     }
+
+    public static String getRemark(int code){
+        String remark="";
+        for (UserAuditEnum userAuditEnum : UserAuditEnum.values()){
+            if(userAuditEnum.getValue() == code){
+                remark = userAuditEnum.getRemark();
+                break;
+            }
+        }
+
+        return remark;
+    }
 }

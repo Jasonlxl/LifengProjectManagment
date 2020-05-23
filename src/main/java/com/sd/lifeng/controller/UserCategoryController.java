@@ -10,16 +10,19 @@ import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.util.TokenUtil;
 import com.sd.lifeng.vo.LoginRequestVO;
 import com.sd.lifeng.vo.RegisterRequestVO;
+import com.sd.lifeng.vo.RegisterResponseVO;
 import com.sd.lifeng.vo.ResultVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,8 +35,6 @@ public class UserCategoryController {
     @Autowired
     private IUserCategoryService userCategoryService;
 
-    @Autowired
-    private JwtConfig jwtConfig;
 
     @PostMapping("/register")
     public ResultVO register(@RequestBody @Valid RegisterRequestVO requestVO, BindingResult bindingResult){
@@ -50,6 +51,14 @@ public class UserCategoryController {
         return ResultVOUtil.success("注册成功，请等待审核");
     }
 
+    @PostMapping("/getRegisterList")
+    public ResultVO getRegisterList(@RequestBody JSONObject jsonObject){
+        logger.info("【获取用户注册列表】参数列表：{}",jsonObject);
+        String status=jsonObject.getString("status");
+        List<RegisterResponseVO> registerResponseVOS =userCategoryService.getRegisterList(status);
+        return ResultVOUtil.success(registerResponseVOS );
+    }
+
 
     @PostMapping("/login")
     public ResultVO login(@RequestBody @Valid  LoginRequestVO loginRequestVO, BindingResult bindingResult){
@@ -61,22 +70,41 @@ public class UserCategoryController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
 
-        UserDO userDO =userCategoryService.login(loginRequestVO.getUserName(),loginRequestVO.getPassword());
-        if(userDO == null){
-            throw new LiFengException(ResultCodeEnum.LOGIN_ERROR);
-        }
-
-        //生成jwt
-        String token=TokenUtil.getToken(userDO.getId().toString(), jwtConfig.getKey());
-
-        Map<String,String> map=new HashMap<>();
-        map.put("token",token);
-
+        Map<String,String> map =userCategoryService.login(loginRequestVO.getUserName(),loginRequestVO.getPassword());
 
         logger.info("response:"+map);
         return ResultVOUtil.success(map);
     }
 
+    @PostMapping("/loginOut")
+    public ResultVO loginOut(){
+        return ResultVOUtil.success();
+    }
+
+    @PostMapping("/getUserList")
+    public ResultVO getUserList(){
+        return ResultVOUtil.success(userCategoryService.getUserList() );
+    }
+
+    /**
+     * 重置密码
+     * @return
+     */
+    @PostMapping("/resetPassword")
+    public ResultVO resetPassword(){
+        return ResultVOUtil.success();
+    }
+
+    /**
+     * 修改密码
+     * @return
+     */
+    @PostMapping("/changePassword")
+    public ResultVO changePassword(@RequestBody JSONObject jsonObject){
+        String newPassword=jsonObject.getString("newPassword");
+        userCategoryService.changePassword(newPassword);
+        return ResultVOUtil.success();
+    }
 
 
 

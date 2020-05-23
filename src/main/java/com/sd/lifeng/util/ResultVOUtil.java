@@ -17,7 +17,7 @@ public class ResultVOUtil {
 
     public static ResultVO success(Object object){
         ResultVO resultVO=new ResultVO();
-        resultVO.setCode("00");
+        resultVO.setCode(ResultCodeEnum.SUCCESS.getCode());
         resultVO.setMsg("成功");
         resultVO.setData(object);
         return resultVO;
@@ -34,7 +34,7 @@ public class ResultVOUtil {
      */
     public static ResultVO success(String msg){
         ResultVO resultVO=new ResultVO();
-        resultVO.setCode("00");
+        resultVO.setCode(ResultCodeEnum.SUCCESS.getCode());
         resultVO.setMsg(msg);
         return resultVO;
     }

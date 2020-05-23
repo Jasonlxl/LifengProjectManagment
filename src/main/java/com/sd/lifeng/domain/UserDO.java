@@ -11,7 +11,6 @@ public class UserDO {
     private String salt;
     private String type;
     private Integer roleid;
-    private String rolename;
     private String createdate;
     private String remark;
 }

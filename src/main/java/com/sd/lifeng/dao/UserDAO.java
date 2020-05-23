@@ -3,6 +3,10 @@ package com.sd.lifeng.dao;
 import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.dto.UserDTO;
+import com.sd.lifeng.enums.UserAuditEnum;
+import com.sd.lifeng.enums.UserTypeEnum;
+import com.sd.lifeng.vo.RegisterResponseVO;
+import com.sd.lifeng.vo.UserListVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +19,7 @@ import org.springframework.util.CollectionUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class UserDAO {
@@ -98,6 +99,31 @@ public class UserDAO {
         return registerDO;
     }
 
+    public List<RegisterResponseVO> getRegisterList(int status){
+        String sql;
+        if(status == -1){
+            //没有查询条件  查询所有的注册列表
+            sql="select * from pro_register";
+        }else{
+            sql="select * from pro_register where status = "+status;
+        }
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        if (CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        List<RegisterResponseVO> registerResponseVOS =new ArrayList<>();
+        for(Map<String,Object> map:list){
+            RegisterResponseVO registerResponseVO=new RegisterResponseVO();
+            registerResponseVO.setTelNo(map.get("telno").toString());
+            registerResponseVO.setRealName(map.get("real_name").toString());
+            registerResponseVO.setCreateDate(map.get("createdate").toString());
+            String statusRemark= UserAuditEnum.getRemark(Integer.parseInt((String) map.get("status")));
+            registerResponseVO.setStatus(statusRemark);
+            registerResponseVOS .add(registerResponseVO);
+        }
+        return registerResponseVOS ;
+    }
+
     /**
      * @Description 往register表中插入注册用户信息
      * @param registerDO  注册用户信息
@@ -122,6 +148,36 @@ public class UserDAO {
     public void insertUser(UserDTO userDTO){
         String sql="insert into pro_user (telno,passwd,salt,realname,type,remark) values (?,?,?,?,?,?)";
 
+    }
+
+    public List<UserListVO> getUserList(){
+        String sql = "select u.*,r.rolename from pro_user u left join pro_roles r on r.id=u.roleid";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        if (CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        List<UserListVO> userListVOList =new ArrayList<>();
+        for(Map<String,Object> map:list){
+            UserListVO userListVO=new UserListVO();
+            userListVO.setTelNo(map.get("telno").toString());
+            userListVO.setRealName(map.get("real_name").toString());
+            userListVO.setCreateDate(map.get("createdate").toString());
+            userListVO.setRoleId(Integer.parseInt((String)map.get("roleid")));
+            userListVO.setRealName(map.get("rolename").toString());
+            String typeRemark= UserTypeEnum.getRemark(Integer.parseInt((String) map.get("type")));
+            userListVO.setTypeRemark(typeRemark);
+            userListVOList .add(userListVO);
+        }
+        return userListVOList ;
+    }
+
+    public int changeUserPassword(int userId,String password){
+        String sql="update pro_user set password = ? where id = ?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setString(1,password);
+            preparedStatement.setInt(2,userId);
+        });
+        return rows;
     }
 
 }

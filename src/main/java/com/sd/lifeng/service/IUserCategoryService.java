@@ -1,6 +1,11 @@
 package com.sd.lifeng.service;
 
 import com.sd.lifeng.domain.UserDO;
+import com.sd.lifeng.vo.RegisterResponseVO;
+import com.sd.lifeng.vo.UserListVO;
+
+import java.util.List;
+import java.util.Map;
 
 public interface IUserCategoryService {
 
@@ -14,7 +19,7 @@ public interface IUserCategoryService {
      */
     void register(String userName,String password,String realName);
 
-    UserDO login(String userName,String password);
+    Map login(String userName, String password);
 
     /*
     密码检查
@@ -22,4 +27,10 @@ public interface IUserCategoryService {
      boolean passwdCheck(String passwd);
 
     UserDO findUserById(int userId);
+
+    void changePassword(String newPssword);
+
+    List<RegisterResponseVO> getRegisterList(String status);
+
+    List<UserListVO> getUserList();
 }

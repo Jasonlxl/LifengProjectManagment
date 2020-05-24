@@ -157,7 +157,10 @@ public class UserDAO {
      * @Return java.util.List<com.sd.lifeng.vo.UserListVO>
      */
     public List<UserListVO> getUserList(){
-        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left join pro_roles r on r.id=u.roleid left join pro_types types on types.id=u.user_type_id";
+        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left join pro_system_roles r on r.id=u.roleid left join pro_types types on types.id=u.user_type_id";
+
+
+//        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left join pro_system_roles r on r.id=u.roleid left join pro_types types on types.id=u.user_type_id";
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
         if (CollectionUtils.isEmpty(list)){
             return null;

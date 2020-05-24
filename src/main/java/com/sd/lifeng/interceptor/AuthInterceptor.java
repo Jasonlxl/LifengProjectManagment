@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.sd.lifeng.annotion.VerifyToken;
+import com.sd.lifeng.config.JwtConfig;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
@@ -26,6 +27,9 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Autowired
     private IUserCategoryService userCategoryService;
+
+    @Autowired
+    private JwtConfig jwtConfig;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -72,7 +76,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 }
 
                 //验证token
-                JWTVerifier jwtVerifier=JWT.require(Algorithm.HMAC256((userDO.getPasswd()))).build();
+                JWTVerifier jwtVerifier=JWT.require(Algorithm.HMAC256((jwtConfig.getKey()))).build();
                 try {
                     jwtVerifier.verify(token);
                 }catch (JWTVerificationException e){

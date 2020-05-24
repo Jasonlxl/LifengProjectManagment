@@ -13,5 +13,4 @@ public class UserDO {
     private Integer roleid;
     private String createdate;
     private String remark;
-    private Integer systemManager;
 }

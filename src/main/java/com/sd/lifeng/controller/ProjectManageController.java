@@ -1,15 +1,19 @@
 package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sd.lifeng.enums.ResultCodeEnum;
+import com.sd.lifeng.exception.LiFengException;
+import com.sd.lifeng.service.IProjectManageService;
+import com.sd.lifeng.vo.NewProjectVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
+import javax.validation.Valid;
+import java.util.Objects;
 
 @Controller
 @RequestMapping("/lifeng/projectctl")
@@ -18,21 +22,35 @@ public class ProjectManageController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private IProjectManageService projectManageService;
 
+    /*
+    新增项目接口
+     */
     @ResponseBody
     @PostMapping("/addnewpro")
-    public String register(@RequestBody JSONObject req){
-        logger.info("register send into msg :"+req);
-
-        String sql = "select * from pro_users where id=1";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
-
-        logger.info("list:"+ list);
-
+    public JSONObject register(@RequestBody @Valid NewProjectVO newProjectVO, BindingResult bindingResult){
+        logger.info("addnewpro send into msg :"+newProjectVO);
         JSONObject response = new JSONObject();
-        response.put("return_code","0");
-        response.put("return_msg","success");
-        return response.toString();
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增工程】参数不正确，newProjectVO={}",newProjectVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //先搜索是否有同一个甲方的同名项目
+        if(projectManageService.repeatCheck(newProjectVO.getProjectName(),newProjectVO.getRoleId())){
+            response.put("code","1001");
+            response.put("msg","已存在该项目，请勿重复添加");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        //尝试新增项目
+        response = projectManageService.addNewProject(newProjectVO);
+
+        logger.info("response :"+response);
+        return response;
     }
 }

@@ -18,7 +18,8 @@ public enum ResultCodeEnum {
     TOKEN_INVALID("13","token失效"),
     USER_HAS_REGISTERED("14","用户名已注册"),
     USER_NOT_EXIST("15","用户不存在"),
-    LOGIN_ERROR("12","用户名密码错误"),
+    LOGIN_ERROR("16","用户名密码错误"),
+    ONLY_MANAGER_CAN_RESET_PASSWORD("17","非系统管理员，不可重置用户密码"),
     DATA_BASE_UPDATE_ERROR("100","数据库更新数据失败");
     private String code;
     private String msg;

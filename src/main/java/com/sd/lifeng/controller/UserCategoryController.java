@@ -8,10 +8,7 @@ import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.util.TokenUtil;
-import com.sd.lifeng.vo.LoginRequestVO;
-import com.sd.lifeng.vo.RegisterRequestVO;
-import com.sd.lifeng.vo.RegisterResponseVO;
-import com.sd.lifeng.vo.ResultVO;
+import com.sd.lifeng.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/lifeng/userctl")
+@RequestMapping("/lifeng/userCtl")
 @CrossOrigin
 public class UserCategoryController {
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -91,7 +88,14 @@ public class UserCategoryController {
      * @return
      */
     @PostMapping("/resetPassword")
-    public ResultVO resetPassword(){
+    public ResultVO resetPassword(@RequestBody @Valid ResetPasswordVO resetPasswordVO, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            logger.error("【重置密码请求】参数不正确，resetPasswordVO={}",resetPasswordVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        userCategoryService.resetPassword(resetPasswordVO.getUserId(),resetPasswordVO.getNewPassword());
         return ResultVOUtil.success();
     }
 
@@ -100,9 +104,13 @@ public class UserCategoryController {
      * @return
      */
     @PostMapping("/changePassword")
-    public ResultVO changePassword(@RequestBody JSONObject jsonObject){
-        String newPassword=jsonObject.getString("newPassword");
-        userCategoryService.changePassword(newPassword);
+    public ResultVO changePassword(@RequestBody @Valid ChangePasswordVO changePasswordVO, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            logger.error("【修改密码请求】参数不正确，changePasswordVO={}",changePasswordVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        userCategoryService.changePassword(changePasswordVO.getNewPassword());
         return ResultVOUtil.success();
     }
 

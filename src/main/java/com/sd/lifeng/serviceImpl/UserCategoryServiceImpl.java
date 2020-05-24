@@ -7,6 +7,7 @@ import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.enums.UserAuditEnum;
 import com.sd.lifeng.exception.LiFengException;
+import com.sd.lifeng.service.ICommonService;
 import com.sd.lifeng.service.ITokenService;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
@@ -36,15 +37,11 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     //初始化日志记录器
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    //注入jdbc
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private UserDAO userDAO;
 
     @Autowired
-    private ITokenService tokenService;
+    private ICommonService commonService;
 
     @Autowired
     private JwtConfig jwtConfig;
@@ -114,24 +111,6 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     }
 
 
-
-    /*
-    密码检查
-     */
-    @Override
-    public boolean passwdCheck(String passwd){
-        String sql = "select passwd from pro_users where id=1";
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
-        logger.info("list:"+ list);
-
-        if(passwd.equals(list.get(0).get("passwd"))){
-            return true;
-        }else{
-            return false;
-        }
-
-    }
-
     /**
      * @Description 根据userId获取用户信息
      * @param userId  用户id
@@ -146,11 +125,26 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
 
     @Override
     public void changePassword(String newPassword) {
-        int userId=tokenService.getUserId();
-        UserDO userDO=userDAO.getUserById(userId);
+        UserDO userDO=commonService.getUserInfo();
         //生成新密码
         String finalPassword= DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + newPassword);
-        int flag=userDAO.changeUserPassword(userId,finalPassword);
+        int flag=userDAO.changeUserPassword(userDO.getId(),finalPassword);
+        if(flag == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public void resetPassword(int userId, String newPassword) {
+        //只有管理员才可以重置密码
+        UserDO userDO=commonService.getUserInfo();
+        if(userDO.getSystemManager() != 1){
+            throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_RESET_PASSWORD);
+        }
+
+        //生成新密码
+        String finalPassword= DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + newPassword);
+        int flag=userDAO.changeUserPassword(userDO.getId(),finalPassword);
         if(flag == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }

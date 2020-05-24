@@ -13,7 +13,8 @@ import lombok.Data;
 public class UserListVO {
     private String telNo;
     private String realName;
-    private String typeRemark;
+    private Integer type;
+    private String typeName;
     private Integer roleId;
     private String roleName;
     private String createDate;

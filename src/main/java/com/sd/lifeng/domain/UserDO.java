@@ -9,8 +9,9 @@ public class UserDO {
     private String passwd;
     private String realname;
     private String salt;
-    private String type;
+    private Integer userTypeId;
     private Integer roleid;
     private String createdate;
     private String remark;
+    private Integer systemManager;
 }

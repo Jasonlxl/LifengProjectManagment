@@ -11,14 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -39,7 +34,6 @@ public class UserDAO {
         String sql="select * from pro_users where  telno=? and passwd=? ";
         Object[] params = new Object[] { userName, password};
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
-//        System.out.println(list);
         if (CollectionUtils.isEmpty(list)){
             return null;
         }
@@ -47,7 +41,6 @@ public class UserDAO {
         userDO.setId((Integer) list.get(0).get("id"));
         userDO.setTelno((String) list.get(0).get("telno"));
         userDO.setPasswd((String) list.get(0).get("passwd"));
-//        System.out.println(userDO);
         return userDO;
     }
 
@@ -98,7 +91,14 @@ public class UserDAO {
         registerDO.setPassword((String) list.get(0).get("passwd"));
         return registerDO;
     }
-
+    
+    /**
+     * @Description 获取用户注册列表
+     * @param status 审核状态 不填默认查询全部
+     * @Auther bmr
+     * @Date 2020/5/24 : 8:48 :51 
+     * @Return java.util.List<com.sd.lifeng.vo.RegisterResponseVO>
+     */
     public List<RegisterResponseVO> getRegisterList(int status){
         String sql;
         if(status == -1){
@@ -150,8 +150,14 @@ public class UserDAO {
 
     }
 
+    /**
+     * @Description 获取用户列表
+     * @Auther bmr
+     * @Date 2020/5/24 : 8:49 :51 
+     * @Return java.util.List<com.sd.lifeng.vo.UserListVO>
+     */
     public List<UserListVO> getUserList(){
-        String sql = "select u.*,r.rolename from pro_user u left join pro_roles r on r.id=u.roleid";
+        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left join pro_roles r on r.id=u.roleid left join pro_types types on types.id=u.user_type_id";
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
         if (CollectionUtils.isEmpty(list)){
             return null;
@@ -164,13 +170,21 @@ public class UserDAO {
             userListVO.setCreateDate(map.get("createdate").toString());
             userListVO.setRoleId(Integer.parseInt((String)map.get("roleid")));
             userListVO.setRealName(map.get("rolename").toString());
-            String typeRemark= UserTypeEnum.getRemark(Integer.parseInt((String) map.get("type")));
-            userListVO.setTypeRemark(typeRemark);
+            userListVO.setType(Integer.parseInt((String) map.get("type")));
+            userListVO.setTypeName((String) map.get("typename"));
             userListVOList .add(userListVO);
         }
         return userListVOList ;
     }
 
+    /**
+     * @Description 更改用户密码
+     * @param userId 用户id
+     * @param password 新密码
+     * @Auther bmr
+     * @Date 2020/5/24 : 9:08 :51
+     * @Return int
+     */
     public int changeUserPassword(int userId,String password){
         String sql="update pro_user set password = ? where id = ?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {

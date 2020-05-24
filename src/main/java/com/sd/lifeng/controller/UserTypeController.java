@@ -1,5 +1,6 @@
 package com.sd.lifeng.controller;
 
+import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.service.IUserTypeService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.vo.ResultVO;
@@ -23,6 +24,7 @@ public class UserTypeController {
     private IUserTypeService userTypeService;
 
     @PostMapping("/getUserTypeList")
+    @VerifyToken
     public ResultVO getUserList(){
         return ResultVOUtil.success(userTypeService.getUserTypeList());
     }

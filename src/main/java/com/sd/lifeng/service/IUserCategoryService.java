@@ -1,6 +1,7 @@
 package com.sd.lifeng.service;
 
 import com.sd.lifeng.domain.UserDO;
+import com.sd.lifeng.vo.LoginResponseVO;
 import com.sd.lifeng.vo.RegisterResponseVO;
 import com.sd.lifeng.vo.UserListVO;
 
@@ -27,7 +28,7 @@ public interface IUserCategoryService {
      * @Date 2020/5/24 : 8:50 :51
      * @Return java.util.Map
      */
-    Map login(String userName, String password);
+    LoginResponseVO login(String userName, String password);
 
     /**
      * @Description 根据用户id获取用户信息

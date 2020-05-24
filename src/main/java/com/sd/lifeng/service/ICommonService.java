@@ -21,7 +21,7 @@ public interface ICommonService {
     /**
      * @Description 获取登录用户id
      * @Auther bmr
-     * @Date 2020/5/24 : 9:04 :51 
+     * @Date 2020/5/24 : 9:24 :51
      * @Return java.lang.Integer
      */
     Integer getUserId();

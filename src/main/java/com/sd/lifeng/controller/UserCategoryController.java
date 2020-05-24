@@ -59,7 +59,7 @@ public class UserCategoryController {
 
     @PostMapping("/login")
     public ResultVO login(@RequestBody @Valid  LoginRequestVO loginRequestVO, BindingResult bindingResult){
-        logger.info("【登录请求】参数列表：{}",loginRequestVO);
+        logger.info("【登录请求】请求参数：{}",loginRequestVO);
 
         if(bindingResult.hasErrors()){
             logger.error("【登录请求】参数不正确，loginRequestVO={}",loginRequestVO);
@@ -67,10 +67,10 @@ public class UserCategoryController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
 
-        Map<String,String> map =userCategoryService.login(loginRequestVO.getUserName(),loginRequestVO.getPassword());
+        LoginResponseVO loginResponseVO =userCategoryService.login(loginRequestVO.getUserName(),loginRequestVO.getPassword());
 
-        logger.info("response:"+map);
-        return ResultVOUtil.success(map);
+        logger.info("【登录请求】返回数据:{}",loginResponseVO);
+        return ResultVOUtil.success(loginResponseVO);
     }
 
     @PostMapping("/loginOut")

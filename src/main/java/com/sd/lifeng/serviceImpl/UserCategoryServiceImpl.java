@@ -12,6 +12,7 @@ import com.sd.lifeng.service.ITokenService;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
 import com.sd.lifeng.util.TokenUtil;
+import com.sd.lifeng.vo.LoginResponseVO;
 import com.sd.lifeng.vo.RegisterResponseVO;
 import com.sd.lifeng.vo.UserListVO;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -88,7 +89,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
      * @return
      */
     @Override
-    public Map login(String userName,String password){
+    public LoginResponseVO login(String userName, String password){
         UserDO userDO=userDAO.getUserByPhone(userName);
         if(userDO == null){
             throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
@@ -105,9 +106,11 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
         String expireTime= df.format(nowTime.plusDays(1L));
         String token= TokenUtil.createToken(userDO.getId().toString(),expireTime, jwtConfig.getKey());
 
-        Map<String,String> map=new HashMap<>();
-        map.put("token",token);
-        return map;
+        LoginResponseVO responseVO=new LoginResponseVO();
+        //todo 还需要查询出用户信息和所能查看的页面
+        responseVO.setToken(token);
+
+        return responseVO;
     }
 
 

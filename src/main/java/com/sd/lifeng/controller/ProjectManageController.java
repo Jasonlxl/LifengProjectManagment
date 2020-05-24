@@ -5,6 +5,7 @@ import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.NewProjectVO;
+import com.sd.lifeng.vo.ProjectSourceVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,38 @@ public class ProjectManageController {
         response = projectManageService.addNewProject(newProjectVO);
 
         logger.info("response :"+response);
+        return response;
+    }
+
+    /*
+    查询静态资源字典
+     */
+    @ResponseBody
+    @PostMapping("/querysource")
+    public JSONObject querySource(@RequestBody String req){
+        logger.info("【查询静态资源字典】:"+req);
+        //查询静态资源
+        JSONObject response = projectManageService.querySource();
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    插入项目静态资源
+     */
+    @ResponseBody
+    @PostMapping("/addprojectsource")
+    public JSONObject addProjectSource(@RequestBody @Valid ProjectSourceVO projectSourceVO, BindingResult bindingResult){
+        logger.info("【新增工程静态资源】:"+projectSourceVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增工程静态资源】参数不正确，projectSourceVO={}",projectSourceVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        //新增静态资源
+        JSONObject response = projectManageService.addProjectSource(projectSourceVO);
+        logger.info("response:"+response);
         return response;
     }
 }

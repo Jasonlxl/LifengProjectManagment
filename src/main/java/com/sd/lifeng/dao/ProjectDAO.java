@@ -1,7 +1,7 @@
 package com.sd.lifeng.dao;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sd.lifeng.domain.ProjectDO;
-import com.sd.lifeng.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Repository
 public class ProjectDAO {
@@ -47,6 +45,10 @@ public class ProjectDAO {
         return false;
     }
 
+    /**
+     * @Description 新项目插入pro_project_details表
+     * @Auther Jason
+     */
     public int addProjectRecord(ProjectDO projectDO) throws Exception{
         String sql = "insert into pro_project_details(projecthash,project_name,create_user,role_id,rolename,createdate,project_addr) values(?,?,?,?,?,now(),?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -64,5 +66,56 @@ public class ProjectDAO {
             }
         },keyHolder);
         return resRow;
+    }
+
+    /**
+     * @Description 查询pro_source_model表
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> querySource(){
+        String sql="select * from pro_source_model";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        return list;
+    }
+
+    /**
+     * @Description 插入pro_project_source表
+     * @Auther Jason
+     */
+    public int addProjectSourceBatch(String projectHash, JSONArray array) throws SQLException,Exception{
+        String sql="insert into pro_project_source(projecthash,source_type,source_name) values(?,?,?)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        int[] res;
+        try{
+            conn = jdbcTemplate.getDataSource().getConnection();
+            pstmt = conn.prepareStatement(sql);
+
+            for(int i = 0; i<array.size(); i++){
+                pstmt.setString(1,projectHash);
+                pstmt.setString(2,array.getJSONObject(i).getString("source_type"));
+                pstmt.setString(3,array.getJSONObject(i).getString("source_name"));
+                pstmt.addBatch();
+            }
+
+            res = pstmt.executeBatch();
+        }catch(SQLException e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new SQLException(e);
+        }catch(Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new Exception(e);
+        }finally {
+            if(conn != null){
+                conn.close();
+            }
+            if(pstmt != null){
+                pstmt.close();
+            }
+        }
+        return res.length;
     }
 }

@@ -6,6 +6,7 @@ import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.NewProjectVO;
 import com.sd.lifeng.vo.ProjectSourceVO;
+import com.sd.lifeng.vo.ProjectTimelineVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +84,38 @@ public class ProjectManageController {
         }
         //新增静态资源
         JSONObject response = projectManageService.addProjectSource(projectSourceVO);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    查询时间线资源字典
+     */
+    @ResponseBody
+    @PostMapping("/querytimeline")
+    public JSONObject queryTimeline(@RequestBody String req){
+        logger.info("【查询时间线字典】:"+req);
+        //查询时间线资源
+        JSONObject response = projectManageService.queryTimeline();
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    插入项目时间线资源
+     */
+    @ResponseBody
+    @PostMapping("/addprojecttimeline")
+    public JSONObject addProjectTimeline(@RequestBody @Valid ProjectTimelineVO projectTimelineVO, BindingResult bindingResult){
+        logger.info("【新增工程时间线资源】:"+projectTimelineVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增工程时间线资源】参数不正确，projectTimelineVO={}",projectTimelineVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        //新增时间线资源
+        JSONObject response = projectManageService.addProjectTimeline(projectTimelineVO);
         logger.info("response:"+response);
         return response;
     }

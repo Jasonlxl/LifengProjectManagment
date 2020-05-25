@@ -3,6 +3,7 @@ package com.sd.lifeng.service;
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.vo.NewProjectVO;
 import com.sd.lifeng.vo.ProjectSourceVO;
+import com.sd.lifeng.vo.ProjectTimelineVO;
 
 public interface IProjectManageService {
     /*
@@ -21,7 +22,17 @@ public interface IProjectManageService {
     public JSONObject querySource();
 
     /*
-    新增静态资源方法
+    新增工程静态资源方法
      */
     public JSONObject addProjectSource(ProjectSourceVO projectSourceVO);
+
+    /*
+    查询时间线资源方法
+    */
+    public JSONObject queryTimeline();
+
+    /*
+    新增工程时间线资源方法
+     */
+    public JSONObject addProjectTimeline(ProjectTimelineVO projectTimelineVO);
 }

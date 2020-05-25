@@ -168,4 +168,25 @@ public class ProjectDAO {
         }
         return res.length;
     }
+
+    /**
+     * @Description 查询pro_unit_part_model表--单元
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryUnit(){
+        String sql="SELECT DISTINCT unit_name FROM pro_unit_part_model";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        return list;
+    }
+
+    /**
+     * @Description 查询pro_unit_part_model表--分部
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryPart(String unitName){
+        String sql="SELECT part_name from pro_unit_part_model where unit_name=?";
+        Object[] params = new Object[] {unitName};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
 }

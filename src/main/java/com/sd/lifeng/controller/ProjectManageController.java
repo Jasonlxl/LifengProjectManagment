@@ -119,4 +119,17 @@ public class ProjectManageController {
         logger.info("response:"+response);
         return response;
     }
+
+    /*
+    查询单元-分部字典
+     */
+    @ResponseBody
+    @PostMapping("/queryunitpart")
+    public JSONObject queryUnitPart(@RequestBody String req){
+        logger.info("【查询单元-分部字典】:"+req);
+        //查询单元-分部
+        JSONObject response = projectManageService.queryUnitPart();
+        logger.info("response:"+response);
+        return response;
+    }
 }

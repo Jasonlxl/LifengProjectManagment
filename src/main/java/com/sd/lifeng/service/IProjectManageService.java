@@ -35,4 +35,9 @@ public interface IProjectManageService {
     新增工程时间线资源方法
      */
     public JSONObject addProjectTimeline(ProjectTimelineVO projectTimelineVO);
+
+    /*
+   查询单元-分部方法
+   */
+    public JSONObject queryUnitPart();
 }

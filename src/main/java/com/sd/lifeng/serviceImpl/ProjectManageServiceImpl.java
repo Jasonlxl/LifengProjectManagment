@@ -189,4 +189,46 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         }
         return result;
     }
+
+    /*
+   查询单元-分部方法
+   */
+    public JSONObject queryUnitPart(){
+        JSONObject result = new JSONObject();
+        //先查所有的单元
+        List<Map<String, Object>> list = projectDAO.queryUnit();
+
+        if(list == null || list.size() == 0){
+            //未配置单元
+            result.put("code","1006");
+            result.put("msg","单元资源未配置");
+        }else{
+            //再查每个单元的所有分部
+            JSONArray finalArray = new JSONArray();
+            for(int i = 0; i<list.size(); i++){
+                JSONObject upObject = new JSONObject();
+                JSONArray array = new JSONArray();
+                List<Map<String, Object>> partList = projectDAO.queryPart((String) list.get(i).get("unit_name"));
+                for(int j=0; j<partList.size();j++){
+                    JSONObject object = new JSONObject();
+                    object.put("id",j+1);
+                    object.put("part_name",partList.get(j).get("part_name"));
+                    array.add(object);
+                }
+                upObject.put("id",i+1);
+                upObject.put("unit_name",list.get(i).get("unit_name"));
+                upObject.put("children",array);
+                finalArray.add(upObject);
+            }
+
+            JSONObject finalObject = new JSONObject();
+            finalObject.put("unit_part",finalArray);
+
+            result.put("code","0");
+            result.put("msg","success");
+            result.put("data",finalObject);
+        }
+
+        return result;
+    }
 }

@@ -52,18 +52,15 @@ public class ProjectDAO {
     public int addProjectRecord(ProjectDO projectDO) throws Exception{
         String sql = "insert into pro_project_details(projecthash,project_name,create_user,role_id,rolename,createdate,project_addr) values(?,?,?,?,?,now(),?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        int resRow = jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, projectDO.getProjectHash());
-                ps.setString(2, projectDO.getProjectName());
-                ps.setInt(3, projectDO.getCreateUser());
-                ps.setInt(4, projectDO.getRoleId());
-                ps.setString(5, projectDO.getRoleName());
-                ps.setString(6, projectDO.getProjectAddr());
-                return ps;
-            }
+        int resRow = jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, projectDO.getProjectHash());
+            ps.setString(2, projectDO.getProjectName());
+            ps.setInt(3, projectDO.getCreateUser());
+            ps.setInt(4, projectDO.getRoleId());
+            ps.setString(5, projectDO.getRoleName());
+            ps.setString(6, projectDO.getProjectAddr());
+            return ps;
         },keyHolder);
         return resRow;
     }

@@ -131,7 +131,7 @@ public class UserDAO {
      * @Date 2020/5/22 : 8:27 :51
      * @Return void
      */
-    public int insertRegister(RegisterDO registerDO){
+    public int addRegister(RegisterDO registerDO){
         String sql="insert into pro_register (telno,passwd,salt,status,remark,real_name) values (?,?,?,?,?,?)";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,registerDO.getTelNo());
@@ -193,6 +193,23 @@ public class UserDAO {
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,password);
             preparedStatement.setInt(2,userId);
+        });
+        return rows;
+    }
+
+    /**
+     * @Description 更改用户审核状态
+     * @param phone 用户手机号
+     * @param auditEnum 审核状态枚举
+     * @Auther bmr
+     * @Date 2020/5/25 : 8:30 :51
+     * @Return int
+     */
+    public int changeUserStatus(String phone, UserAuditEnum auditEnum){
+        String sql="update pro_register set status =? where id = ?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setString(1,phone);
+            preparedStatement.setInt(2,auditEnum.getValue());
         });
         return rows;
     }

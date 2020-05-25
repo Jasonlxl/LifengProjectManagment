@@ -8,7 +8,6 @@ import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.enums.UserAuditEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ICommonService;
-import com.sd.lifeng.service.ITokenService;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
 import com.sd.lifeng.util.TokenUtil;
@@ -19,16 +18,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Administrator on 2020/5/18.
@@ -75,7 +70,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
         dto.setSalt(salt);
         dto.setRealName(realName);
         dto.setStatus(UserAuditEnum.PRE_AUDIT.getValue());
-        int count=userDAO.insertRegister(dto);
+        int count=userDAO.addRegister(dto);
         if(count == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }

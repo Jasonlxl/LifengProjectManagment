@@ -57,6 +57,12 @@ public class UserCategoryController {
     }
 
 
+    /**
+     * 用户登录
+     * @param loginRequestVO
+     * @param bindingResult
+     * @return
+     */
     @PostMapping("/login")
     public ResultVO login(@RequestBody @Valid  LoginRequestVO loginRequestVO, BindingResult bindingResult){
         logger.info("【登录请求】请求参数：{}",loginRequestVO);
@@ -78,6 +84,10 @@ public class UserCategoryController {
         return ResultVOUtil.success();
     }
 
+    /**
+     * 获取用户列表
+     * @return
+     */
     @PostMapping("/getUserList")
     public ResultVO getUserList(){
         return ResultVOUtil.success(userCategoryService.getUserList() );

@@ -7,6 +7,7 @@ import com.sd.lifeng.vo.UserListVO;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IUserCategoryService {
 
@@ -73,5 +74,5 @@ public interface IUserCategoryService {
      * @Date 2020/5/24 : 8:54 :51
      * @Return java.util.List<com.sd.lifeng.vo.UserListVO>
      */
-    List<UserListVO> getUserList();
+    Set<UserListVO> getUserList();
 }

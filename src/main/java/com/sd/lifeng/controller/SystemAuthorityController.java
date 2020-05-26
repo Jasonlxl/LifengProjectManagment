@@ -35,5 +35,10 @@ public class SystemAuthorityController {
         return ResultVOUtil.success(systemAuthorityService.getResourceList());
     }
 
-
+    @PostMapping("/addUserRole")
+    @VerifyToken
+    public ResultVO addUserRole(){
+//        systemAuthorityService.insertUserRole();
+        return ResultVOUtil.success();
+    }
 }

@@ -36,4 +36,24 @@ public interface ISystemAuthorityService {
      * @date 2020/5/25 : 8:59 :51
      */
     void editRole(SystemRolesDO rolesDO);
+
+    /**
+     * @description 为用户分配角色
+     * @param userId 用户id
+     * @param roleId 角色id
+     * @author bmr
+     * @date 2020/5/26 : 17:26 :51
+     * @return void
+     */
+    void insertUserRole(int userId,int roleId);
+
+    /**
+     * @description 为角色分配资源
+     * @param roleId 角色id
+     * @param resourceId 资源id
+     * @author bmr
+     * @date 2020/5/26 : 17:27 :51
+     * @return void
+     */
+    void insertRoleResource(int roleId,int resourceId);
 }

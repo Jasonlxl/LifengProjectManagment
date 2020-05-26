@@ -47,4 +47,22 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }
     }
+
+    @Override
+    public void insertUserRole(int userId, int roleId) {
+        int row;
+        row=systemAuthorityDAO.addUserRole(userId,roleId);
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public void insertRoleResource(int roleId, int resourceId) {
+        int row;
+        row=systemAuthorityDAO.addRoleResource(roleId,resourceId);
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
 }

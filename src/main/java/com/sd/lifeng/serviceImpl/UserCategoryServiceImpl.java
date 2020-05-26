@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Administrator on 2020/5/18.
@@ -160,7 +161,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     }
 
     @Override
-    public List<UserListVO> getUserList() {
+    public Set<UserListVO> getUserList() {
         return userDAO.getUserList();
     }
 }

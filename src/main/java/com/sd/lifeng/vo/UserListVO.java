@@ -3,6 +3,9 @@ package com.sd.lifeng.vo;
 
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @Classname UserListVO
  * @Description
@@ -11,11 +14,14 @@ import lombok.Data;
  */
 @Data
 public class UserListVO {
+    private Integer userId;
     private String telNo;
     private String realName;
     private Integer type;
     private String typeName;
-    private Integer roleId;
     private String roleName;
     private String createDate;
+    private Set<RoleVO> roleList = new HashSet<>();
+    private Set<ResourceVO> resourceList = new HashSet<>();
+
 }

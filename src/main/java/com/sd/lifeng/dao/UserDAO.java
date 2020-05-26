@@ -6,6 +6,8 @@ import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.UserAuditEnum;
 import com.sd.lifeng.enums.UserTypeEnum;
 import com.sd.lifeng.vo.RegisterResponseVO;
+import com.sd.lifeng.vo.ResourceVO;
+import com.sd.lifeng.vo.RoleVO;
 import com.sd.lifeng.vo.UserListVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,26 +158,44 @@ public class UserDAO {
      * @Date 2020/5/24 : 8:49 :51 
      * @Return java.util.List<com.sd.lifeng.vo.UserListVO>
      */
-    public List<UserListVO> getUserList(){
-        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left join pro_system_roles r on r.id=u.roleid left join pro_types types on types.id=u.user_type_id";
+    public Set<UserListVO> getUserList(){
+    //        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left
+    // join pro_system_roles r on r.id=u.roleid left join pro_types types on
+    // types.id=u.user_type_id";
 
-
-//        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left join pro_system_roles r on r.id=u.roleid left join pro_types types on types.id=u.user_type_id";
+        String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,re.id as resource_id,re.resource_name,re.resource_url FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id";
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
         if (CollectionUtils.isEmpty(list)){
             return null;
         }
-        List<UserListVO> userListVOList =new ArrayList<>();
+        System.out.println(list);
+        Set<UserListVO> userListVOList =new HashSet<>();
         for(Map<String,Object> map:list){
             UserListVO userListVO=new UserListVO();
+            userListVO.setUserId(Integer.parseInt(map.get("id").toString()));
             userListVO.setTelNo(map.get("telno").toString());
-            userListVO.setRealName(map.get("real_name").toString());
+            userListVO.setRealName(map.get("realname").toString());
             userListVO.setCreateDate(map.get("createdate").toString());
-            userListVO.setRoleId(Integer.parseInt((String)map.get("roleid")));
-            userListVO.setRealName(map.get("rolename").toString());
-            userListVO.setType(Integer.parseInt((String) map.get("type")));
-            userListVO.setTypeName((String) map.get("typename"));
-            userListVOList .add(userListVO);
+            userListVO.setType(Integer.parseInt(map.get("type").toString()));
+            userListVO.setTypeName(map.get("typename").toString());
+            userListVOList.add(userListVO);
+        }
+        for (UserListVO userListVO : userListVOList){
+            for(Map<String,Object> map:list){
+                int userId=Integer.parseInt(map.get("id").toString());
+                if(userListVO.getUserId() == userId){
+                    RoleVO roleVO=new RoleVO();
+                    roleVO.setId(Integer.parseInt(map.get("role_id").toString()));
+                    roleVO.setRoleName(map.get("role_name").toString());
+                    userListVO.getRoleList().add(roleVO);
+
+                    ResourceVO resourceVO=new ResourceVO();
+                    resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
+                    resourceVO.setResourceName(map.get("resource_name").toString());
+                    resourceVO.setResourceUrl(map.get("resource_url").toString());
+                    userListVO.getResourceList().add(resourceVO);
+                }
+            }
         }
         return userListVOList ;
     }
@@ -213,5 +233,7 @@ public class UserDAO {
         });
         return rows;
     }
+
+
 
 }

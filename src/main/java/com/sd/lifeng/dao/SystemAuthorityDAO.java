@@ -4,6 +4,8 @@ import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.vo.ResourceVO;
 import com.sd.lifeng.vo.RoleVO;
 import com.sd.lifeng.vo.UserListVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -21,6 +23,8 @@ import java.util.Map;
  */
 @Repository
 public class SystemAuthorityDAO {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -103,5 +107,40 @@ public class SystemAuthorityDAO {
         System.out.println(rows);
         return rows;
     }
-    
+
+    /**
+     * @description 为用户分配角色
+     * @param userId 用户id
+     * @param roleId 角色id
+     * @author bmr
+     * @date 2020/5/26 : 17:16 :51
+     * @return int
+     */
+    public int addUserRole(int userId, int roleId){
+        String sql="insert into pro_system_user_role (user_id,role_id) values (?,?)";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setInt(1,userId);
+            preparedStatement.setInt(2,roleId);
+        });
+        logger.info("【为用户分配角色】插入影响行数:{}",rows);
+        return rows;
+    }
+
+    /**
+     * @description 为角色分配资源
+     * @param roleId 角色id
+     * @param resourceId 资源id
+     * @author bmr
+     * @date 2020/5/26 : 17:21 :51 
+     * @return int
+     */
+    public int addRoleResource(int roleId, int resourceId){
+        String sql="insert into pro_system_role_resource (role_id,resource_id) values (?,?)";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setInt(1,roleId);
+            preparedStatement.setInt(2,resourceId);
+        });
+        logger.info("【为角色分配资源】插入影响行数:{}",rows);
+        return rows;
+    }
 }

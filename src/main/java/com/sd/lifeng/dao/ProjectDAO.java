@@ -1,7 +1,9 @@
 package com.sd.lifeng.dao;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.domain.ProjectDO;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,17 +90,29 @@ public class ProjectDAO {
         int[] res;
         try{
             conn = jdbcTemplate.getDataSource().getConnection();
+            conn.setAutoCommit(false);
             pstmt = conn.prepareStatement(sql);
 
+            String source_type = "";
+            String source_name ;
             for(int i = 0; i<array.size(); i++){
+                source_type = array.getJSONObject(i).getString("source_type");
+                source_name = array.getJSONObject(i).getString("source_name");
+
+                if(StringUtils.isBlank(source_type) || StringUtils.isBlank(source_name)){
+                    throw new Exception("异常：检测到有静态资源为空");
+                }
+
                 pstmt.setString(1,projectHash);
-                pstmt.setString(2,array.getJSONObject(i).getString("source_type"));
-                pstmt.setString(3,array.getJSONObject(i).getString("source_name"));
+                pstmt.setString(2,source_type);
+                pstmt.setString(3,source_name);
                 pstmt.addBatch();
             }
 
             res = pstmt.executeBatch();
+            conn.commit();
         }catch(SQLException e){
+            conn.rollback();
             e.printStackTrace();
             logger.error(e.getMessage());
             throw new SQLException(e);
@@ -139,18 +153,29 @@ public class ProjectDAO {
         int[] res;
         try{
             conn = jdbcTemplate.getDataSource().getConnection();
+            conn.setAutoCommit(false);
             pstmt = conn.prepareStatement(sql);
 
+            String timeline_type;
+            String timeline_name;
             for(int i = 0; i<array.size(); i++){
+                timeline_type = array.getJSONObject(i).getString("timeline_type");
+                timeline_name = array.getJSONObject(i).getString("timeline_name");
+
+                if(StringUtils.isBlank(timeline_type) || StringUtils.isBlank(timeline_name)){
+                    throw new Exception("异常：检测到有时间线资源为空");
+                }
                 pstmt.setString(1,projectHash);
-                pstmt.setString(2,array.getJSONObject(i).getString("timeline_type"));
-                pstmt.setString(3,array.getJSONObject(i).getString("timeline_name"));
+                pstmt.setString(2,timeline_type);
+                pstmt.setString(3,timeline_name);
                 pstmt.setString(4,UUID.randomUUID().toString());
                 pstmt.addBatch();
             }
 
             res = pstmt.executeBatch();
+            conn.commit();
         }catch(SQLException e){
+            conn.rollback();
             e.printStackTrace();
             logger.error(e.getMessage());
             throw new SQLException(e);
@@ -188,5 +213,68 @@ public class ProjectDAO {
         Object[] params = new Object[] {unitName};
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
         return list;
+    }
+
+    /**
+     * @Description 插入pro_project_unit_part表
+     * @Auther Jason
+     */
+    public int addProjectUnitPartBatch(String projectHash, JSONArray array) throws SQLException,Exception{
+        String sql="insert into pro_project_unit_part(projecthash,unit_name,part_name) values(?,?,?)";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        int[] res;
+        try{
+            conn = jdbcTemplate.getDataSource().getConnection();
+            conn.setAutoCommit(false);
+            pstmt = conn.prepareStatement(sql);
+
+            String unit_name = "";
+            String part_name = "";
+            for(int i = 0; i<array.size(); i++){
+                JSONObject unitObject = array.getJSONObject(i);
+                unit_name = unitObject.getString("unit_name");
+
+                if(StringUtils.isBlank(unit_name)){
+                    throw new Exception("异常：检测到有单位名称为空");
+                }
+
+                JSONArray partArray = unitObject.getJSONArray("children");
+                for(int j = 0; j<partArray.size(); j++){
+                    JSONObject partObject = partArray.getJSONObject(j);
+                    part_name = partObject.getString("part_name");
+
+                    if(StringUtils.isBlank(part_name)){
+                        throw new Exception("异常：检测到有分部名称为空");
+                    }
+
+                    pstmt.setString(1,projectHash);
+                    pstmt.setString(2,unit_name);
+                    pstmt.setString(3,part_name);
+                    pstmt.addBatch();
+                }
+            }
+
+            res = pstmt.executeBatch();
+            conn.commit();
+        }catch(SQLException e){
+            e.printStackTrace();
+            conn.rollback();
+            logger.error(e.getMessage());
+            throw new SQLException(e);
+        }catch(Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new Exception(e);
+        }finally {
+            if(conn != null){
+                conn.close();
+            }
+            if(pstmt != null){
+                pstmt.close();
+            }
+        }
+        return res.length;
     }
 }

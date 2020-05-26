@@ -9,6 +9,7 @@ import com.sd.lifeng.util.DateUtil;
 import com.sd.lifeng.vo.NewProjectVO;
 import com.sd.lifeng.vo.ProjectSourceVO;
 import com.sd.lifeng.vo.ProjectTimelineVO;
+import com.sd.lifeng.vo.ProjectUnitPartVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,6 +230,33 @@ public class ProjectManageServiceImpl implements IProjectManageService {
             result.put("data",finalObject);
         }
 
+        return result;
+    }
+
+    /*
+    新增工程单元-分部方法
+   */
+    public JSONObject addProjectUnitPart(ProjectUnitPartVO projectUnitPartVO){
+        JSONObject result = new JSONObject();
+        int res = 0;
+
+        try{
+            res = projectDAO.addProjectUnitPartBatch(projectUnitPartVO.getProjectHash(),projectUnitPartVO.getUnit_part());
+            //插入成功
+            logger.info("成功插入"+res+"条单元-分部");
+            result.put("code","0");
+            result.put("msg","成功插入"+res+"条单元-分部");
+            //返回原项目串码
+            JSONObject projectHash = new JSONObject();
+            projectHash.put("projectHash",projectUnitPartVO.getProjectHash());
+
+            result.put("data",projectHash);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            //插入异常
+            result.put("code","1007");
+            result.put("msg",e.getMessage());
+        }
         return result;
     }
 }

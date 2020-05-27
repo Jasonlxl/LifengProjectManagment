@@ -7,6 +7,7 @@ import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.NewProjectVO;
 import com.sd.lifeng.vo.ProjectSourceVO;
 import com.sd.lifeng.vo.ProjectTimelineVO;
+import com.sd.lifeng.vo.ProjectUnitPartVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +130,25 @@ public class ProjectManageController {
         logger.info("【查询单元-分部字典】:"+req);
         //查询单元-分部
         JSONObject response = projectManageService.queryUnitPart();
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    插入项目单元-分部
+     */
+    @ResponseBody
+    @PostMapping("/addprojectunitpart")
+    public JSONObject addProjectUintPart(@RequestBody @Valid ProjectUnitPartVO projectUnitPartVO, BindingResult bindingResult){
+        logger.info("【新增单元-分部】:"+projectUnitPartVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增单元-分部】参数不正确，projectTimelineVO={}",projectUnitPartVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        //新增单元-分部
+        JSONObject response = projectManageService.addProjectUnitPart(projectUnitPartVO);
         logger.info("response:"+response);
         return response;
     }

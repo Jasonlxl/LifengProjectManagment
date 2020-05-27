@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.vo.NewProjectVO;
 import com.sd.lifeng.vo.ProjectSourceVO;
 import com.sd.lifeng.vo.ProjectTimelineVO;
+import com.sd.lifeng.vo.ProjectUnitPartVO;
 
 public interface IProjectManageService {
     /*
@@ -40,4 +41,9 @@ public interface IProjectManageService {
    查询单元-分部方法
    */
     public JSONObject queryUnitPart();
+
+    /*
+   新增工程单元-分部方法
+    */
+    public JSONObject addProjectUnitPart(ProjectUnitPartVO projectUnitPartVO);
 }

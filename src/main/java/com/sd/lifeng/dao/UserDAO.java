@@ -4,11 +4,10 @@ import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.UserAuditEnum;
-import com.sd.lifeng.enums.UserTypeEnum;
-import com.sd.lifeng.vo.RegisterResponseVO;
-import com.sd.lifeng.vo.ResourceVO;
-import com.sd.lifeng.vo.RoleVO;
-import com.sd.lifeng.vo.UserListVO;
+import com.sd.lifeng.vo.user.RegisterResponseVO;
+import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
+import com.sd.lifeng.vo.user.UserListVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +98,7 @@ public class UserDAO {
      * @param status 审核状态 不填默认查询全部
      * @Auther bmr
      * @Date 2020/5/24 : 8:48 :51 
-     * @Return java.util.List<com.sd.lifeng.vo.RegisterResponseVO>
+     * @Return java.util.List<com.sd.lifeng.vo.user.RegisterResponseVO>
      */
     public List<RegisterResponseVO> getRegisterList(int status){
         String sql;
@@ -119,8 +118,9 @@ public class UserDAO {
             registerResponseVO.setTelNo(map.get("telno").toString());
             registerResponseVO.setRealName(map.get("real_name").toString());
             registerResponseVO.setCreateDate(map.get("createdate").toString());
-            String statusRemark= UserAuditEnum.getRemark(Integer.parseInt((String) map.get("status")));
-            registerResponseVO.setStatus(statusRemark);
+            registerResponseVO.setStatus(Integer.parseInt(map.get("status").toString()));
+            String statusRemark= UserAuditEnum.getRemark(Integer.parseInt(map.get("status").toString()));
+            registerResponseVO.setStatusDescription(statusRemark);
             registerResponseVOS .add(registerResponseVO);
         }
         return registerResponseVOS ;
@@ -148,7 +148,7 @@ public class UserDAO {
     }
 
     public void insertUser(UserDTO userDTO){
-        String sql="insert into pro_user (telno,passwd,salt,realname,type,remark) values (?,?,?,?,?,?)";
+        String sql="insert into pro_user (telno,passwd,salt,realname,user_type_id,remark) values (?,?,?,?,?,?)";
 
     }
 
@@ -156,7 +156,7 @@ public class UserDAO {
      * @Description 获取用户列表
      * @Auther bmr
      * @Date 2020/5/24 : 8:49 :51 
-     * @Return java.util.List<com.sd.lifeng.vo.UserListVO>
+     * @Return java.util.List<com.sd.lifeng.vo.user.UserListVO>
      */
     public Set<UserListVO> getUserList(){
     //        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left
@@ -220,16 +220,16 @@ public class UserDAO {
     /**
      * @Description 更改用户审核状态
      * @param phone 用户手机号
-     * @param auditEnum 审核状态枚举
+     * @param status 审核状态
      * @Auther bmr
      * @Date 2020/5/25 : 8:30 :51
      * @Return int
      */
-    public int changeUserStatus(String phone, UserAuditEnum auditEnum){
+    public int changeUserStatus(String phone, int status){
         String sql="update pro_register set status =? where id = ?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,phone);
-            preparedStatement.setInt(2,auditEnum.getValue());
+            preparedStatement.setInt(2,status);
         });
         return rows;
     }

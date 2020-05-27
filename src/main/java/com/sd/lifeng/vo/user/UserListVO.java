@@ -1,6 +1,8 @@
-package com.sd.lifeng.vo;
+package com.sd.lifeng.vo.user;
 
 
+import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
 import lombok.Data;
 
 import java.util.HashSet;

@@ -5,8 +5,8 @@ import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ISystemAuthorityService;
-import com.sd.lifeng.vo.ResourceVO;
-import com.sd.lifeng.vo.RoleVO;
+import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

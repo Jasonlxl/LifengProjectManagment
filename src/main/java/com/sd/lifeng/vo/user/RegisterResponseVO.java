@@ -1,4 +1,4 @@
-package com.sd.lifeng.vo;
+package com.sd.lifeng.vo.user;
 
 import lombok.Data;
 
@@ -13,6 +13,7 @@ public class RegisterResponseVO {
 
     private String telNo;
     private String realName;
-    private String status;
+    private Integer status;
+    private String statusDescription;
     private String createDate;
 }

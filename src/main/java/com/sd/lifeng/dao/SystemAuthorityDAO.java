@@ -1,9 +1,8 @@
 package com.sd.lifeng.dao;
 
 import com.sd.lifeng.domain.SystemRolesDO;
-import com.sd.lifeng.vo.ResourceVO;
-import com.sd.lifeng.vo.RoleVO;
-import com.sd.lifeng.vo.UserListVO;
+import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class SystemAuthorityDAO {
      * @Description 获取系统角色列表
      * @Auther bmr
      * @Date 2020/5/25 : 8:37 :51
-     * @Return java.util.List<com.sd.lifeng.vo.RoleVO>
+     * @Return java.util.List<com.sd.lifeng.vo.auth.RoleVO>
      */
     public List<RoleVO> getRoleList(){
         String sql = "select * from pro_system_roles";
@@ -54,7 +53,7 @@ public class SystemAuthorityDAO {
      * @Description 获取系统资源列表
      * @Auther bmr
      * @Date 2020/5/25 : 8:48 :51
-     * @Return java.util.List<com.sd.lifeng.vo.ResourceVO>
+     * @Return java.util.List<com.sd.lifeng.vo.auth.ResourceVO>
      */
     public List<ResourceVO> getResourceList(){
         String sql = "select * from pro_system_resource";

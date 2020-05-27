@@ -1,7 +1,6 @@
 package com.sd.lifeng.dao;
 
-import com.sd.lifeng.vo.UserListVO;
-import com.sd.lifeng.vo.UserTypeVO;
+import com.sd.lifeng.vo.user.UserTypeVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

@@ -2,7 +2,7 @@ package com.sd.lifeng.serviceImpl;
 
 import com.sd.lifeng.dao.UserTypeDAO;
 import com.sd.lifeng.service.IUserTypeService;
-import com.sd.lifeng.vo.UserTypeVO;
+import com.sd.lifeng.vo.user.UserTypeVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

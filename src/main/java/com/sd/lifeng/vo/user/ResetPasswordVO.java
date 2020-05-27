@@ -1,4 +1,4 @@
-package com.sd.lifeng.vo;
+package com.sd.lifeng.vo.user;
 
 import lombok.Data;
 

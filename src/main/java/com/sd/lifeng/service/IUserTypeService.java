@@ -1,6 +1,6 @@
 package com.sd.lifeng.service;
 
-import com.sd.lifeng.vo.UserTypeVO;
+import com.sd.lifeng.vo.user.UserTypeVO;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface IUserTypeService {
      * @Description 获取用户类型列表
      * @Auther bmr
      * @Date 2020/5/24 : 8:59 :51
-     * @Return java.util.List<com.sd.lifeng.vo.UserTypeVO>
+     * @Return java.util.List<com.sd.lifeng.vo.user.UserTypeVO>
      */
     List<UserTypeVO> getUserTypeList();
 }

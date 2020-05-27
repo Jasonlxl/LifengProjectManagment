@@ -1,8 +1,8 @@
 package com.sd.lifeng.service;
 
 import com.sd.lifeng.domain.SystemRolesDO;
-import com.sd.lifeng.vo.ResourceVO;
-import com.sd.lifeng.vo.RoleVO;
+import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface ISystemAuthorityService {
      * @Description 获取系统角色列表
      * @Auther bmr
      * @Date 2020/5/25 : 8:41 :51 
-     * @Return java.util.List<com.sd.lifeng.vo.RoleVO>
+     * @Return java.util.List<com.sd.lifeng.vo.auth.RoleVO>
      */
     List<RoleVO> getRoleList();
 
@@ -25,7 +25,7 @@ public interface ISystemAuthorityService {
      * @Description 获取系统资源列表
      * @Auther bmr
      * @Date 2020/5/25 : 8:50 :51
-     * @Return java.util.List<com.sd.lifeng.vo.ResourceVO>
+     * @Return java.util.List<com.sd.lifeng.vo.auth.ResourceVO>
      */
     List<ResourceVO> getResourceList();
 

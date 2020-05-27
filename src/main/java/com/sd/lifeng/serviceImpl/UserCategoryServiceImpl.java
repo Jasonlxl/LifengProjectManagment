@@ -11,9 +11,9 @@ import com.sd.lifeng.service.ICommonService;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
 import com.sd.lifeng.util.TokenUtil;
-import com.sd.lifeng.vo.LoginResponseVO;
-import com.sd.lifeng.vo.RegisterResponseVO;
-import com.sd.lifeng.vo.UserListVO;
+import com.sd.lifeng.vo.user.LoginResponseVO;
+import com.sd.lifeng.vo.user.RegisterResponseVO;
+import com.sd.lifeng.vo.user.UserListVO;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,5 +163,19 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     @Override
     public Set<UserListVO> getUserList() {
         return userDAO.getUserList();
+    }
+
+    @Override
+    public void userAudit(String userName, int status) {
+        int row=userDAO.changeUserStatus(userName,status);
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+
+        if(status == UserAuditEnum.AUDIT_SUCCESS.getValue()){
+
+        }
+        //添加用户信息
+        //todo 用户审核通过后  添加用户信息
     }
 }

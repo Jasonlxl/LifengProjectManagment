@@ -18,4 +18,8 @@ public class UserDTO {
 
     private String realName;
 
+    private String salt;
+
+    private String remark;
+
 }

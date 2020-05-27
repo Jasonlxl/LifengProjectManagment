@@ -21,4 +21,8 @@ public class LiFengException extends RuntimeException{
         super(message);
         this.code = code;
     }
+
+    public LiFengException(String message) {
+        super(message);
+    }
 }

@@ -90,6 +90,9 @@ public class UserDAO {
         registerDO.setId((Integer) list.get(0).get("id"));
         registerDO.setTelNo((String) list.get(0).get("telno"));
         registerDO.setPassword((String) list.get(0).get("passwd"));
+        registerDO.setRealName((String) list.get(0).get("real_name"));
+        registerDO.setSalt((String) list.get(0).get("salt"));
+        registerDO.setStatus((Integer) list.get(0).get("status"));
         return registerDO;
     }
     
@@ -147,9 +150,17 @@ public class UserDAO {
         return rows;
     }
 
-    public void insertUser(UserDTO userDTO){
-        String sql="insert into pro_user (telno,passwd,salt,realname,user_type_id,remark) values (?,?,?,?,?,?)";
-
+    public int insertUser(UserDTO userDTO){
+        String sql="insert into pro_users (telno,passwd,salt,realname,user_type_id,remark) values (?,?,?,?,?,?)";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setString(1,userDTO.getUserName());
+            preparedStatement.setString(2,userDTO.getPassword());
+            preparedStatement.setString(3,userDTO.getSalt());
+            preparedStatement.setString(4,userDTO.getRealName());
+            preparedStatement.setInt(5,userDTO.getType());
+            preparedStatement.setString(6,userDTO.getRemark());
+        });
+        return rows;
     }
 
     /**
@@ -226,10 +237,10 @@ public class UserDAO {
      * @Return int
      */
     public int changeUserStatus(String phone, int status){
-        String sql="update pro_register set status =? where id = ?";
+        String sql="update pro_register set status =? where telno = ?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
-            preparedStatement.setString(1,phone);
-            preparedStatement.setInt(2,status);
+            preparedStatement.setInt(1,status);
+            preparedStatement.setString(2,phone);
         });
         return rows;
     }

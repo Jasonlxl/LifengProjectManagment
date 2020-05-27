@@ -21,7 +21,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/lifeng/userCtl")
 @CrossOrigin
-public class UserCategoryController {
+public class UserCategoryController extends BaseController{
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
@@ -41,9 +41,10 @@ public class UserCategoryController {
     public ResultVO userAudit(@RequestBody @Valid UserAuditVO requestVO, BindingResult bindingResult){
         logger.info("【用户审核请求】参数列表：{}",requestVO);
         dealBindingResult("用户审核",requestVO,bindingResult);
-
+        userCategoryService.userAudit(requestVO.getUserName(),requestVO.getStatus(),requestVO.getUserTypeId());
         return ResultVOUtil.success();
     }
+
     /**
      * 用户登录
      * @param requestVO
@@ -106,17 +107,6 @@ public class UserCategoryController {
         return ResultVOUtil.success();
     }
 
-    /**
-     * 处理前端传递参数不正确
-     * @param logType 日志请求类型
-     * @param requestVO 请求参数实体
-     */
-    private void dealBindingResult(String logType,Object requestVO,BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            logger.error("【"+logType+"请求】参数不正确，requestVo={}",requestVO);
-            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
-                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
-        }
-    }
+
 
 }

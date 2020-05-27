@@ -4,6 +4,7 @@ import com.sd.lifeng.config.JwtConfig;
 import com.sd.lifeng.dao.UserDAO;
 import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
+import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.enums.UserAuditEnum;
 import com.sd.lifeng.exception.LiFengException;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
@@ -106,6 +108,8 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
         //todo 还需要查询出用户信息和所能查看的页面
         responseVO.setToken(token);
 
+
+
         return responseVO;
     }
 
@@ -166,16 +170,35 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     }
 
     @Override
-    public void userAudit(String userName, int status) {
+    @Transactional
+    public void userAudit(String userName, int status, int userTypeId) {
+        RegisterDO registerDO=userDAO.getRegisterUserByPhone(userName);
+        if(registerDO.getStatus() == UserAuditEnum.AUDIT_SUCCESS.getValue()){
+            throw new LiFengException(ResultCodeEnum.USER_HAS_AUDITED);
+        }
         int row=userDAO.changeUserStatus(userName,status);
         if(row == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }
 
         if(status == UserAuditEnum.AUDIT_SUCCESS.getValue()){
-
+            if(userTypeId == 0){
+                throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),"请传递用户类型");
+            }
+            //添加用户信息
+            UserDTO userDTO=new UserDTO();
+            userDTO.setUserName(registerDO.getTelNo());
+            userDTO.setPassword(registerDO.getPassword());
+            userDTO.setSalt(registerDO.getSalt());
+            userDTO.setRealName(registerDO.getRealName());
+            userDTO.setType(userTypeId);
+      System.out.println(userDTO);
+             row=userDAO.insertUser(userDTO);
+            if(row == 0){
+                throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+            }
         }
-        //添加用户信息
-        //todo 用户审核通过后  添加用户信息
+
+
     }
 }

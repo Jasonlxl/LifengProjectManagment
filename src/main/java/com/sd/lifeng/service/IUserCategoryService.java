@@ -79,9 +79,10 @@ public interface IUserCategoryService {
      * @description 用户审核
      * @param userName 用户名
      * @param status 审核状态
+     * @param userTypeId 用户类型id
      * @author bmr
      * @date 2020/5/27 : 9:01 :51
      * @return void
      */
-    void userAudit(String userName,int status);
+    void userAudit(String userName,int status,int userTypeId);
 }

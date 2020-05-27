@@ -13,8 +13,10 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UserAuditVO {
 
-    @NotNull(message = "用户id不能为空")
-    private Integer userId;
+    @NotNull(message = "用户手机号不能为空")
+    private String userName;
     @NotNull(message = "审核状态不能为空")
     private Integer status;
+
+    private int userTypeId;
 }

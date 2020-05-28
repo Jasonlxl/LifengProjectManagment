@@ -4,10 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
-import com.sd.lifeng.vo.NewProjectVO;
-import com.sd.lifeng.vo.ProjectSourceVO;
-import com.sd.lifeng.vo.ProjectTimelineVO;
-import com.sd.lifeng.vo.ProjectUnitPartVO;
+import com.sd.lifeng.vo.*;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,12 +120,12 @@ public class ProjectManageController {
     }
 
     /*
-    查询单元-分部字典
+    查询单位-分部字典
      */
     @ResponseBody
     @PostMapping("/queryunitpart")
     public JSONObject queryUnitPart(@RequestBody String req){
-        logger.info("【查询单元-分部字典】:"+req);
+        logger.info("【查询单位-分部字典】:"+req);
         //查询单元-分部
         JSONObject response = projectManageService.queryUnitPart();
         logger.info("response:"+response);
@@ -135,20 +133,85 @@ public class ProjectManageController {
     }
 
     /*
-    插入项目单元-分部
+    插入项目单位-分部
      */
     @ResponseBody
     @PostMapping("/addprojectunitpart")
     public JSONObject addProjectUintPart(@RequestBody @Valid ProjectUnitPartVO projectUnitPartVO, BindingResult bindingResult){
-        logger.info("【新增单元-分部】:"+projectUnitPartVO);
+        logger.info("【新增单位-分部】:"+projectUnitPartVO);
 
         if(bindingResult.hasErrors()){
-            logger.error("【新增单元-分部】参数不正确，projectTimelineVO={}",projectUnitPartVO);
+            logger.error("【新增单位-分部】参数不正确，projectUnitPartVO={}",projectUnitPartVO);
             throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增单元-分部
         JSONObject response = projectManageService.addProjectUnitPart(projectUnitPartVO);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    查询单元字典
+     */
+    @ResponseBody
+    @PostMapping("/querycent")
+    public JSONObject queryCent(@RequestBody String req){
+        logger.info("【查询单元字典】:"+req);
+        //查询单位
+        JSONObject response = projectManageService.queryCent();
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    查询某项目所有分部
+     */
+    @ResponseBody
+    @PostMapping("/queryprojectpartlist")
+    public JSONObject queryProjectPartList(@RequestBody JSONObject req){
+        logger.info("【查询某项目所有分部】:"+req);
+        JSONObject response = new JSONObject();
+        String projectHash;
+        try{
+            projectHash = req.getString("projectHash");
+
+            if(StringUtils.isBlank(projectHash)){
+                response.put("code","1009");
+                response.put("msg","项目唯一串码不得为空");
+                logger.info("response:"+response);
+                return response;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            response.put("code","1010");
+            response.put("msg","数据包解析异常");
+            logger.info("response:"+response);
+            return response;
+        }
+
+        //查询某项目所有分部
+        response = projectManageService.queryProjectPartList(projectHash);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    插入项目分部-单元
+     */
+    @ResponseBody
+    @PostMapping("/addprojectpartcent")
+    public JSONObject addProjectPartCent(@RequestBody @Valid ProjectPartCentVO projectPartCentVO, BindingResult bindingResult){
+        logger.info("【新增分部-单元】:"+projectPartCentVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增分部-单元】参数不正确，projectPartCentVO={}",projectPartCentVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        //新增分部-单元
+        JSONObject response = projectManageService.addProjectPartCent(projectPartCentVO);
         logger.info("response:"+response);
         return response;
     }

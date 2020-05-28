@@ -1,10 +1,7 @@
 package com.sd.lifeng.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sd.lifeng.vo.NewProjectVO;
-import com.sd.lifeng.vo.ProjectSourceVO;
-import com.sd.lifeng.vo.ProjectTimelineVO;
-import com.sd.lifeng.vo.ProjectUnitPartVO;
+import com.sd.lifeng.vo.*;
 
 public interface IProjectManageService {
     /*
@@ -38,12 +35,27 @@ public interface IProjectManageService {
     public JSONObject addProjectTimeline(ProjectTimelineVO projectTimelineVO);
 
     /*
-   查询单元-分部方法
+   查询单位-分部方法
    */
     public JSONObject queryUnitPart();
 
     /*
-   新增工程单元-分部方法
+   新增工程单位-分部方法
     */
     public JSONObject addProjectUnitPart(ProjectUnitPartVO projectUnitPartVO);
+
+    /*
+   查询单元字典方法
+   */
+    public JSONObject queryCent();
+
+    /*
+   查询某项目所有分部
+   */
+    public JSONObject queryProjectPartList(String projectHash);
+
+    /*
+    新增工程分部-单元方法
+   */
+    public JSONObject addProjectPartCent(ProjectPartCentVO projectPartCentVO);
 }

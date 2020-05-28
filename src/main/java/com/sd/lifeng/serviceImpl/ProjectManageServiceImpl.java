@@ -6,10 +6,7 @@ import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.domain.ProjectDO;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.util.DateUtil;
-import com.sd.lifeng.vo.NewProjectVO;
-import com.sd.lifeng.vo.ProjectSourceVO;
-import com.sd.lifeng.vo.ProjectTimelineVO;
-import com.sd.lifeng.vo.ProjectUnitPartVO;
+import com.sd.lifeng.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -192,30 +189,25 @@ public class ProjectManageServiceImpl implements IProjectManageService {
     }
 
     /*
-   查询单元-分部方法
+   查询单位-分部方法
    */
     public JSONObject queryUnitPart(){
         JSONObject result = new JSONObject();
-        //先查所有的单元
+        //先查所有的单位
         List<Map<String, Object>> list = projectDAO.queryUnit();
 
         if(list == null || list.size() == 0){
-            //未配置单元
+            //未配置单位
             result.put("code","1006");
-            result.put("msg","单元资源未配置");
+            result.put("msg","单位资源未配置");
         }else{
-            //再查每个单元的所有分部
+            //再查每个单位的所有分部
             JSONArray finalArray = new JSONArray();
             for(int i = 0; i<list.size(); i++){
                 JSONObject upObject = new JSONObject();
                 JSONArray array = new JSONArray();
                 List<Map<String, Object>> partList = projectDAO.queryPart((String) list.get(i).get("unit_name"));
-                for(int j=0; j<partList.size();j++){
-                    JSONObject object = new JSONObject();
-                    object.put("id",j+1);
-                    object.put("part_name",partList.get(j).get("part_name"));
-                    array.add(object);
-                }
+                addPartName(partList, array);
                 upObject.put("id",i+1);
                 upObject.put("unit_name",list.get(i).get("unit_name"));
                 upObject.put("children",array);
@@ -234,7 +226,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
     }
 
     /*
-    新增工程单元-分部方法
+    新增工程单位-分部方法
    */
     public JSONObject addProjectUnitPart(ProjectUnitPartVO projectUnitPartVO){
         JSONObject result = new JSONObject();
@@ -243,9 +235,9 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         try{
             res = projectDAO.addProjectUnitPartBatch(projectUnitPartVO.getProjectHash(),projectUnitPartVO.getUnit_part());
             //插入成功
-            logger.info("成功插入"+res+"条单元-分部");
+            logger.info("成功插入"+res+"条单位-分部");
             result.put("code","0");
-            result.put("msg","成功插入"+res+"条单元-分部");
+            result.put("msg","成功插入"+res+"条单位-分部");
             //返回原项目串码
             JSONObject projectHash = new JSONObject();
             projectHash.put("projectHash",projectUnitPartVO.getProjectHash());
@@ -258,5 +250,107 @@ public class ProjectManageServiceImpl implements IProjectManageService {
             result.put("msg",e.getMessage());
         }
         return result;
+    }
+
+    /*
+    查询单元方法
+     */
+    public JSONObject queryCent(){
+        JSONObject result = new JSONObject();
+        //查询表
+        List<Map<String, Object>> list = projectDAO.queryCent();
+
+        if(list == null || list.size() == 0){
+            //静态资源为空
+            result.put("code","1008");
+            result.put("msg","系统内尚未配置单元模板");
+        }else{
+            JSONArray array = new JSONArray();
+            for(int i = 0; i<list.size(); i++){
+                JSONObject object = new JSONObject();
+                object.put("id",i+1);
+                object.put("cent_name",list.get(i).get("cent_name"));
+                object.put("cent_type",list.get(i).get("cent_type"));
+
+                if("2".equals(list.get(i).get("cent_type"))){
+                    object.put("measurement",list.get(i).get("measurement"));
+                }else{
+                    object.put("measurement","");
+                }
+                array.add(object);
+            }
+            JSONObject centList = new JSONObject();
+            centList.put("centList",array);
+
+            result.put("code","0");
+            result.put("msg","success");
+            result.put("data",centList);
+        }
+        return result;
+    }
+
+    /*
+    查询某项目所有分部
+     */
+    public JSONObject queryProjectPartList(String projectHash){
+        JSONObject result = new JSONObject();
+        //查询表
+        List<Map<String, Object>> list = projectDAO.queryProjectPartList(projectHash);
+
+        if(list == null || list.size() == 0){
+            //单位-分部为空
+            result.put("code","1011");
+            result.put("msg","查询异常，该项目未添加任何单位-分部");
+        }else{
+            JSONArray array = new JSONArray();
+            addPartName(list, array);
+            JSONObject projectPartList = new JSONObject();
+            projectPartList.put("projectPartList",array);
+            projectPartList.put("projectHash",projectHash);
+
+            result.put("code","0");
+            result.put("msg","success");
+            result.put("data",projectPartList);
+        }
+        return result;
+    }
+
+    /*
+   新增工程分部-单元方法
+    */
+    public JSONObject addProjectPartCent(ProjectPartCentVO projectPartCentVO){
+        JSONObject result = new JSONObject();
+        int res = 0;
+
+        try{
+            res = projectDAO.addProjectPartCentBatch(projectPartCentVO.getProjectHash(),projectPartCentVO.getPart_cent());
+            //插入成功
+            logger.info("成功插入"+res+"条分部-单元");
+            result.put("code","0");
+            result.put("msg","成功插入"+res+"条分部-单元");
+            //返回原项目串码
+            JSONObject projectHash = new JSONObject();
+            projectHash.put("projectHash",projectPartCentVO.getProjectHash());
+
+            result.put("data",projectHash);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            //插入异常
+            result.put("code","1012");
+            result.put("msg",e.getMessage());
+        }
+        return result;
+    }
+
+    /*
+    封装分部列表公共方法
+     */
+    private void addPartName(List<Map<String, Object>> list, JSONArray array) {
+        for(int i = 0; i<list.size(); i++){
+            JSONObject object = new JSONObject();
+            object.put("id",i+1);
+            object.put("part_name",list.get(i).get("part_name"));
+            array.add(object);
+        }
     }
 }

@@ -195,7 +195,7 @@ public class ProjectDAO {
     }
 
     /**
-     * @Description 查询pro_unit_part_model表--单元
+     * @Description 查询pro_unit_part_model表--单位
      * @Auther Jason
      */
     public List<Map<String,Object>> queryUnit(){
@@ -253,6 +253,125 @@ public class ProjectDAO {
                     pstmt.setString(2,unit_name);
                     pstmt.setString(3,part_name);
                     pstmt.addBatch();
+                }
+            }
+
+            res = pstmt.executeBatch();
+            conn.commit();
+        }catch(SQLException e){
+            e.printStackTrace();
+            conn.rollback();
+            logger.error(e.getMessage());
+            throw new SQLException(e);
+        }catch(Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new Exception(e);
+        }finally {
+            if(conn != null){
+                conn.close();
+            }
+            if(pstmt != null){
+                pstmt.close();
+            }
+        }
+        return res.length;
+    }
+
+    /**
+     * @Description 查询pro_cent_model表
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryCent(){
+        String sql="select * from pro_cent_model";
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        return list;
+    }
+
+    /**
+     * @Description 查询pro_project_unit_part表
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryProjectPartList(String projectHash){
+        String sql="select part_name from pro_project_unit_part where projecthash = ?";
+        Object[] params = new Object[] {projectHash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 插入pro_project_cent_list表
+     * @Auther Jason
+     */
+    public int addProjectPartCentBatch(String projectHash, JSONArray array) throws SQLException,Exception{
+        String sql="insert into pro_project_cent_list(projecthash,part_name,cent_name,centhash,cent_type,createdate) values(?,?,?,?,?,now())";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        int[] res;
+        try{
+            conn = jdbcTemplate.getDataSource().getConnection();
+            conn.setAutoCommit(false);
+            pstmt = conn.prepareStatement(sql);
+
+            String part_name;
+            String cent_name;
+            String cent_type;
+            String measurement;
+            int total;
+            int component;
+            for(int i = 0; i<array.size(); i++){
+                JSONObject partObject = array.getJSONObject(i);
+                part_name = partObject.getString("part_name");
+
+                if(StringUtils.isBlank(part_name)){
+                    throw new Exception("异常：检测到有分部名称为空");
+                }
+
+                JSONArray centArray = partObject.getJSONArray("children");
+                for(int j = 0; j<centArray.size(); j++){
+                    JSONObject centObject = centArray.getJSONObject(j);
+                    cent_name = centObject.getString("cent_name");
+
+                    if(StringUtils.isBlank(cent_name)){
+                        throw new Exception("异常：检测到有单元名称为空");
+                    }
+
+                    cent_type = centObject.getString("cent_type");
+
+                    if("1".equals(cent_type)){
+                        pstmt.setString(1,projectHash);
+                        pstmt.setString(2,part_name);
+                        pstmt.setString(3,cent_name);
+                        pstmt.setString(4,UUID.randomUUID().toString());
+                        pstmt.setString(5,cent_type);
+                        pstmt.addBatch();
+                    }else{
+                        measurement = centObject.getString("measurement");
+                        total = centObject.getInteger("total");
+                        component = centObject.getInteger("component");
+
+                        float total_float = total;
+                        float component_float = component;
+                        int row = (int)Math.ceil(total_float/component_float);
+                        int head = 0;
+                        String suffix;
+
+                        for(int k = 1; k<=row; k++){
+                            if((head+component)>=total){
+                                suffix = "("+head+measurement+"--"+(total)+measurement+")";
+                            }else{
+                                suffix = "("+head+measurement+"--"+(head+component)+measurement+")";
+                            }
+                            pstmt.setString(1,projectHash);
+                            pstmt.setString(2,part_name);
+                            pstmt.setString(3,cent_name+suffix);
+                            pstmt.setString(4,UUID.randomUUID().toString());
+                            pstmt.setString(5,cent_type);
+                            pstmt.addBatch();
+                            head+=component;
+                        }
+                    }
                 }
             }
 

@@ -80,6 +80,7 @@ public class UserCategoryController extends BaseController{
      * @return
      */
     @PostMapping("/getUserList")
+    @VerifyToken
     public ResultVO getUserList(){
         return ResultVOUtil.success(userCategoryService.getUserList() );
     }
@@ -89,6 +90,7 @@ public class UserCategoryController extends BaseController{
      * @return
      */
     @PostMapping("/resetPassword")
+    @VerifyToken
     public ResultVO resetPassword(@RequestBody @Valid ResetPasswordVO requestVO, BindingResult bindingResult){
         dealBindingResult("重置密码",requestVO,bindingResult);
 
@@ -101,6 +103,7 @@ public class UserCategoryController extends BaseController{
      * @return
      */
     @PostMapping("/changePassword")
+    @VerifyToken
     public ResultVO changePassword(@RequestBody @Valid ChangePasswordVO requestVO, BindingResult bindingResult){
         dealBindingResult("修改密码",requestVO,bindingResult);
         userCategoryService.changePassword(requestVO.getNewPassword());

@@ -10,6 +10,7 @@ import lombok.Data;
  */
 @Data
 public class UserTypeVO {
+    private Integer id;
     private Integer type;
     private String typeName;
 }

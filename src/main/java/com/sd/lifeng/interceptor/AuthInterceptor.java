@@ -11,6 +11,9 @@ import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IUserCategoryService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
 import org.apache.catalina.LifecycleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -21,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class AuthInterceptor implements HandlerInterceptor {
@@ -44,6 +48,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         HandlerMethod handlerMethod=(HandlerMethod) handler;
         Method method=handlerMethod.getMethod();
 
+        //todo jwt这里好像没有进行校验  抽时间研究一下jwt
+
         //检查需不需要验证token
         if(method.isAnnotationPresent(VerifyToken.class)){
             VerifyToken userLoginToken = method.getAnnotation(VerifyToken.class);
@@ -52,24 +58,23 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new LiFengException(ResultCodeEnum.TOKEN_MISS);
                 }
 
-                //获取token中的userId和expireTime
+                //获取token中的userId
                 String userId;
-                String expireTime;
+                LocalDateTime expireTime=JWT.decode(token).getExpiresAt().toInstant().atZone( ZoneId.systemDefault() ).toLocalDateTime();;
+                //判断token是否过期
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime nowTime=LocalDateTime.now();
+
+                if(expireTime.isBefore(nowTime)){
+                    throw new LiFengException(ResultCodeEnum.TOKEN_INVALID);
+                }
+
                 try {
                     userId= JWT.decode(token).getAudience().get(0);
-                    expireTime= JWT.decode(token).getAudience().get(1);
                 }catch (JWTDecodeException e){
                     throw new LiFengException(ResultCodeEnum.TOKEN_ILLEGAL);
                 }
 
-                //判断token是否过期
-                DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                LocalDateTime nowTime=LocalDateTime.now();
-                LocalDateTime expireDateTime = LocalDateTime.parse(expireTime, df);
-
-                if(expireDateTime.isBefore(nowTime)){
-                    throw new LiFengException(ResultCodeEnum.TOKEN_INVALID);
-                }
                 UserDO userDO = userCategoryService.findUserById(Integer.parseInt(userId));
                 if(userDO == null){
                     throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);

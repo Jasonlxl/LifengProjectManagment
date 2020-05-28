@@ -4,10 +4,12 @@ import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.UserAuditEnum;
+import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.RegisterResponseVO;
 import com.sd.lifeng.vo.auth.ResourceVO;
 import com.sd.lifeng.vo.auth.RoleVO;
 import com.sd.lifeng.vo.user.UserListVO;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +55,19 @@ public class UserDAO {
     * @Return com.sd.lifeng.domain.UserDO
     */
     public UserDO getUserById(int userId){
-        String sql="select * from pro_user where id = ?";
+        String sql="select * from pro_users where id = ?";
         Object[] params = new Object[] { userId};
-        return jdbcTemplate.queryForObject(sql,params,UserDO.class);
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        if (CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        UserDO userDO=new UserDO();
+        userDO.setId((Integer) list.get(0).get("id"));
+        userDO.setTelno((String) list.get(0).get("telno"));
+        userDO.setPasswd((String) list.get(0).get("passwd"));
+        userDO.setSalt((String) list.get(0).get("salt"));
+        return userDO;
     }
 
     /**
@@ -66,9 +78,17 @@ public class UserDAO {
      * @Return com.sd.lifeng.domain.UserDO
      */
     public UserDO getUserByPhone(String phone){
-        String sql="select * from pro_user where telno = ?";
+        String sql="select * from pro_users where telno = ?";
         Object[] params = new Object[] { phone};
-        UserDO userDO =jdbcTemplate.queryForObject(sql,params,UserDO.class);
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        if (CollectionUtils.isEmpty(list)){
+            return null;
+        }
+        UserDO userDO=new UserDO();
+        userDO.setId((Integer) list.get(0).get("id"));
+        userDO.setTelno((String) list.get(0).get("telno"));
+        userDO.setPasswd((String) list.get(0).get("passwd"));
+        userDO.setSalt((String) list.get(0).get("salt"));
         return userDO;
     }
 
@@ -115,6 +135,7 @@ public class UserDAO {
         if (CollectionUtils.isEmpty(list)){
             return null;
         }
+    System.out.println(list);
         List<RegisterResponseVO> registerResponseVOS =new ArrayList<>();
         for(Map<String,Object> map:list){
             RegisterResponseVO registerResponseVO=new RegisterResponseVO();
@@ -124,6 +145,7 @@ public class UserDAO {
             registerResponseVO.setStatus(Integer.parseInt(map.get("status").toString()));
             String statusRemark= UserAuditEnum.getRemark(Integer.parseInt(map.get("status").toString()));
             registerResponseVO.setStatusDescription(statusRemark);
+      System.out.println(registerResponseVO);
             registerResponseVOS .add(registerResponseVO);
         }
         return registerResponseVOS ;
@@ -170,9 +192,6 @@ public class UserDAO {
      * @Return java.util.List<com.sd.lifeng.vo.user.UserListVO>
      */
     public Set<UserListVO> getUserList(){
-    //        String sql = "select u.*,r.rolename,types.type,types.typename from pro_user u left
-    // join pro_system_roles r on r.id=u.roleid left join pro_types types on
-    // types.id=u.user_type_id";
 
         String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,re.id as resource_id,re.resource_name,re.resource_url FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id";
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
@@ -195,21 +214,80 @@ public class UserDAO {
             for(Map<String,Object> map:list){
                 int userId=Integer.parseInt(map.get("id").toString());
                 if(userListVO.getUserId() == userId){
-                    RoleVO roleVO=new RoleVO();
-                    roleVO.setId(Integer.parseInt(map.get("role_id").toString()));
-                    roleVO.setRoleName(map.get("role_name").toString());
-                    userListVO.getRoleList().add(roleVO);
+                    if(map.get("role_id") != null){
+                        RoleVO roleVO=new RoleVO();
+                        roleVO.setId(Integer.parseInt(map.get("role_id").toString()));
+                        roleVO.setRoleName(map.get("role_name").toString());
+                        userListVO.getRoleList().add(roleVO);
 
-                    ResourceVO resourceVO=new ResourceVO();
-                    resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
-                    resourceVO.setResourceName(map.get("resource_name").toString());
-                    resourceVO.setResourceUrl(map.get("resource_url").toString());
-                    userListVO.getResourceList().add(resourceVO);
+                        ResourceVO resourceVO=new ResourceVO();
+                        resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
+                        resourceVO.setResourceName(map.get("resource_name").toString());
+                        resourceVO.setResourceUrl(map.get("resource_url").toString());
+                        userListVO.getResourceList().add(resourceVO);
+                    }
+
                 }
             }
         }
         return userListVOList ;
     }
+
+    /**
+     * @Description 获取用户详情  包含角色和可查看资源
+     * @param userId 用户id
+     * @Auther bmr
+     * @Date 2020/5/24 : 8:49 :51
+     * @Return java.util.List<com.sd.lifeng.vo.user.UserListVO>
+     */
+    public LoginResponseVO getUserDetailById(int userId){
+
+        String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,ro.system_manager,re.id as resource_id,re.resource_name,re.resource_url FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id where u.id = ?";
+        Object[] params = new Object[] { userId };
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        if (CollectionUtils.isEmpty(list)){
+            return null;
+        }
+//        System.out.println(list);
+        Set<LoginResponseVO> responseVOList = new HashSet<>();
+        for(Map<String,Object> map:list){
+            LoginResponseVO responseVO=new LoginResponseVO();
+            responseVO.setUserId(Integer.parseInt(map.get("id").toString()));
+            responseVO.setUserName(map.get("telno").toString());
+            responseVO.setRealName(map.get("realname").toString());
+            responseVO.setCreateTime(map.get("createdate").toString());
+            responseVO.setUserType(Integer.parseInt(map.get("type").toString()));
+            responseVO.setUserTypeName(map.get("typename").toString());
+            responseVOList.add(responseVO);
+        }
+        for (LoginResponseVO responseVO : responseVOList){
+            for(Map<String,Object> map:list){
+                int id=Integer.parseInt(map.get("id").toString());
+                if(responseVO.getUserId() == id){
+
+                    if(map.get("role_id") != null){
+                        RoleVO roleVO=new RoleVO();
+                        roleVO.setId(Integer.parseInt(map.get("role_id").toString()));
+                        roleVO.setRoleName(map.get("role_name").toString());
+                        roleVO.setSystemManager(Integer.parseInt(map.get("system_manager").toString()));
+                        responseVO.getRoleVOList().add(roleVO);
+                    }
+
+                    if(map.get("resource_id") != null){
+                        ResourceVO resourceVO=new ResourceVO();
+                        resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
+                        resourceVO.setResourceName(map.get("resource_name").toString());
+                        resourceVO.setResourceUrl(map.get("resource_url").toString());
+                        responseVO.getResourceVOList().add(resourceVO);
+                    }
+
+                }
+            }
+        }
+
+        return responseVOList.iterator().next() ;
+    }
+
 
     /**
      * @Description 更改用户密码
@@ -220,7 +298,10 @@ public class UserDAO {
      * @Return int
      */
     public int changeUserPassword(int userId,String password){
-        String sql="update pro_user set password = ? where id = ?";
+        //todo  更新一直不成功
+    System.out.println(userId);
+    System.out.println(password);
+        String sql="update pro_users set passwd =? where id =?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,password);
             preparedStatement.setInt(2,userId);
@@ -237,14 +318,12 @@ public class UserDAO {
      * @Return int
      */
     public int changeUserStatus(String phone, int status){
-        String sql="update pro_register set status =? where telno = ?";
+        String sql="update pro_register set status =? where telno =?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setInt(1,status);
             preparedStatement.setString(2,phone);
         });
         return rows;
     }
-
-
 
 }

@@ -21,7 +21,6 @@ public class UserListVO {
     private String realName;
     private Integer type;
     private String typeName;
-    private String roleName;
     private String createDate;
     private Set<RoleVO> roleList = new HashSet<>();
     private Set<ResourceVO> resourceList = new HashSet<>();

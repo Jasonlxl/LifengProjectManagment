@@ -1,6 +1,5 @@
 package com.sd.lifeng.serviceImpl;
 
-import com.sd.lifeng.config.JwtConfig;
 import com.sd.lifeng.dao.UserDAO;
 import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
@@ -9,9 +8,9 @@ import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.enums.UserAuditEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ICommonService;
+import com.sd.lifeng.service.ITokenService;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
-import com.sd.lifeng.util.TokenUtil;
 import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.RegisterResponseVO;
 import com.sd.lifeng.vo.user.UserListVO;
@@ -23,8 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +41,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     private ICommonService commonService;
 
     @Autowired
-    private JwtConfig jwtConfig;
+    private ITokenService tokenService;
 
 
     /**
@@ -99,16 +97,10 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
         }
 
         //生成jwt
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime nowTime=LocalDateTime.now();
-        String expireTime= df.format(nowTime.plusDays(1L));
-        String token= TokenUtil.createToken(userDO.getId().toString(),expireTime, jwtConfig.getKey());
+        String token= tokenService.createToken(userDO.getId().toString());
 
-        LoginResponseVO responseVO=new LoginResponseVO();
-        //todo 还需要查询出用户信息和所能查看的页面
+        LoginResponseVO responseVO=userDAO.getUserDetailById(userDO1.getId());
         responseVO.setToken(token);
-
-
 
         return responseVO;
     }
@@ -141,13 +133,15 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     public void resetPassword(int userId, String newPassword) {
         //只有管理员才可以重置密码
         UserDO userDO=commonService.getUserInfo();
-        if(userDO.getSystemManager() != 1){
+        if(! commonService.isSystemManager()){
             throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_RESET_PASSWORD);
         }
-
+        if(newPassword == null){
+            newPassword = "123456";
+        }
         //生成新密码
         String finalPassword= DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + newPassword);
-        int flag=userDAO.changeUserPassword(userDO.getId(),finalPassword);
+        int flag=userDAO.changeUserPassword(userId,finalPassword);
         if(flag == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }

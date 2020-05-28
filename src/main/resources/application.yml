@@ -15,4 +15,6 @@ spring:
 
 jwt:
   key: cjwdjwt668886
+  expire: 24
+  unit: L
 ##test111

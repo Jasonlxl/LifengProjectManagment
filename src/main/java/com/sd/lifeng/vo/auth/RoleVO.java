@@ -12,4 +12,5 @@ import lombok.Data;
 public class RoleVO {
     private Integer id;
     private String roleName;
+    private Integer systemManager;
 }

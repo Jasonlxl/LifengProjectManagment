@@ -31,7 +31,8 @@ public class UserTypeDAO {
         List<UserTypeVO> userTypeVOS =new ArrayList<>();
         for(Map<String,Object> map:list){
             UserTypeVO typeVO=new UserTypeVO();
-            typeVO.setType(Integer.parseInt((String) map.get("type")));
+            typeVO.setId(Integer.parseInt(map.get("id").toString()));
+            typeVO.setType(Integer.parseInt(map.get("type").toString()));
             typeVO.setTypeName((String) map.get("typename"));
             userTypeVOS .add(typeVO);
         }

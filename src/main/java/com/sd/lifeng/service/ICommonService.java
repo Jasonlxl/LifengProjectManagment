@@ -25,4 +25,12 @@ public interface ICommonService {
      * @Return java.lang.Integer
      */
     Integer getUserId();
+    
+    /**
+     * @description 获取当前用户是否为系统管理员
+     * @author bmr
+     * @date 2020/5/28 : 18:26 :51 
+     * @return boolean
+     */
+    boolean isSystemManager();
 }

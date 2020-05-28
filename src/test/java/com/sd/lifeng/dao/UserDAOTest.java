@@ -1,6 +1,7 @@
 package com.sd.lifeng.dao;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.UserListVO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,5 +27,12 @@ public class UserDAOTest {
    public void getUserListTest(){
         Set<UserListVO> userListVOList =userDAO.getUserList();
     System.out.println(JSONObject.toJSONString(userListVOList));
+    }
+
+    @Test
+    public void getUserDetailById(){
+        LoginResponseVO responseVO=userDAO.getUserDetailById(1);
+    System.out.println(responseVO);
+    System.out.println(JSONObject.toJSONString(responseVO));
     }
 }

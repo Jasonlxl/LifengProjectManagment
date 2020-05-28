@@ -1,8 +1,10 @@
 package com.sd.lifeng.vo.user;
 
 import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
 import lombok.Data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -16,7 +18,7 @@ public class LoginResponseVO {
 
     private String token;
 
-    private int id;
+    private int userId;
 
     private String userName;
 
@@ -24,9 +26,11 @@ public class LoginResponseVO {
 
     private int userType;
 
-    private String userTypeRemark;
+    private String userTypeName;
 
     private String createTime;
 
-    private Set<ResourceVO> resourceVOList;
+    private Set<RoleVO> roleVOList = new HashSet<>();
+
+    private Set<ResourceVO> resourceVOList = new HashSet<>();
 }

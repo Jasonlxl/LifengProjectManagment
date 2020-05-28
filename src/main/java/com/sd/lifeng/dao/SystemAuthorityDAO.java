@@ -42,7 +42,7 @@ public class SystemAuthorityDAO {
         List<RoleVO> roleVOList =new ArrayList<>();
         for(Map<String,Object> map:list){
             RoleVO roleVO=new RoleVO();
-            roleVO.setId(Integer.parseInt((String) map.get("id")));
+            roleVO.setId(Integer.parseInt( map.get("id").toString()));
             roleVO.setRoleName(map.get("role_name").toString());
             roleVOList .add(roleVO);
         }
@@ -64,7 +64,7 @@ public class SystemAuthorityDAO {
         List<ResourceVO> resourceVOList =new ArrayList<>();
         for(Map<String,Object> map:list){
             ResourceVO resourceVO=new ResourceVO();
-            resourceVO.setId(Integer.parseInt((String) map.get("id")));
+            resourceVO.setId(Integer.parseInt( map.get("id").toString()));
             resourceVO.setResourceName(map.get("resource_name").toString());
             resourceVO.setResourceUrl(map.get("resource_url").toString());
             resourceVOList .add(resourceVO);

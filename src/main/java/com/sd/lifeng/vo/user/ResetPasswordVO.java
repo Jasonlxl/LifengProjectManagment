@@ -17,6 +17,5 @@ public class ResetPasswordVO {
     @NotNull(message = "用户id不能为空")
     private Integer userId;
 
-    @NotEmpty(message = "用户新密码不能为空")
     private String newPassword;
 }

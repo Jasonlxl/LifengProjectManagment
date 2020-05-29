@@ -41,11 +41,8 @@ public class ProjectDAO {
         Object[] params = new Object[] { projectName,roleId};
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
-        if(list.size()>0){
-            //存在记录
-            return true;
-        }
-        return false;
+        //存在记录
+        return list.size() > 0;
     }
 
     /**

@@ -56,4 +56,14 @@ public interface ISystemAuthorityService {
      * @return void
      */
     void insertRoleResource(int roleId,int resourceId);
+
+    /**
+     * @description 移除用户角色
+     * @param userId 用户id
+     * @param roleId 角色id
+     * @author bmr
+     * @date 2020/5/26 : 17:26 :51
+     * @return void
+     */
+    void removeUserRole(int userId,int roleId);
 }

@@ -20,6 +20,8 @@ public enum ResultCodeEnum {
     USER_NOT_EXIST("15","用户不存在"),
     USER_HAS_AUDITED("18","用户已审核通过，请勿重复操作"),
     LOGIN_ERROR("16","用户名密码错误"),
+    ROLE_NOT_EXIST("17","角色不存在"),
+    USER_ROLE_NOT_EXIST("18","用户未分配该角色，不能移除"),
     ONLY_MANAGER_CAN_RESET_PASSWORD("17","非系统管理员，不可重置用户密码"),
     DATA_BASE_UPDATE_ERROR("100","数据库更新数据失败");
     private String code;

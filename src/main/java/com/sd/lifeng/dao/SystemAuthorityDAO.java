@@ -142,4 +142,62 @@ public class SystemAuthorityDAO {
         logger.info("【为角色分配资源】插入影响行数:{}",rows);
         return rows;
     }
+
+    /**
+     * @description 移除用户角色
+     * @param userId 用户id
+     * @param roleId 角色id
+     * @author bmr
+     * @date 2020/5/26 : 17:21 :51
+     * @return int
+     */
+    public int removeUserRole(int userId, int roleId){
+        String sql="DELETE FROM pro_system_user_role where user_id=? and role_id=?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setInt(1,userId);
+            preparedStatement.setInt(2,roleId);
+        });
+        logger.info("【移除用户角色】影响行数:{}",rows);
+        return rows;
+    }
+
+    /**
+     * @Description 根据Id获取系统角色
+     * @param roleId 用户id
+     * @Auther bmr
+     * @Date 2020/5/25 : 8:37 :51
+     * @Return SystemRolesDO
+     */
+    public SystemRolesDO getRoleById(int roleId){
+        String sql = "select * from pro_system_roles where id =?";
+        Object[] params = {roleId};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        if (CollectionUtils.isEmpty(list)){
+            return null;
+        }
+
+        SystemRolesDO rolesDO=new SystemRolesDO();
+        rolesDO.setId((Integer) list.get(0).get("id"));
+        rolesDO.setRoleName((String)list.get(0).get("role_name"));
+        rolesDO.setSystemManager((Integer) list.get(0).get("system_manager"));
+        return rolesDO ;
+    }
+
+    /**
+     * @Description 根据userId和roleId获取用户分配的角色
+     * @param userId 用户id
+     * @param roleId 角色id
+     * @Auther bmr
+     * @Date 2020/5/25 : 8:37 :51
+     * @Return
+     */
+    public boolean getUserRoleByUserIdAndRoleId(int userId, int roleId){
+        String sql = "select * from pro_system_user_role where user_id =? and role_id=?";
+        Object[] params = {userId,roleId};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        if (CollectionUtils.isEmpty(list)){
+            return false;
+        }
+        return true ;
+    }
 }

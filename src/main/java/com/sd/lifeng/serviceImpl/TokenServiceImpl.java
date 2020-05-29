@@ -29,7 +29,7 @@ public class TokenServiceImpl implements ITokenService {
     private JwtConfig jwtConfig;
 
     @Override
-    public String createToken(String str) {
+    public String createToken(String userId) {
         DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime nowTime=LocalDateTime.now();
         LocalDateTime expireDateTime = null;
@@ -46,7 +46,7 @@ public class TokenServiceImpl implements ITokenService {
             expireDateTime = nowTime;
         }
         Date expireDate=Date.from(expireDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        return JWT.create().withAudience(str).withExpiresAt(expireDate).sign(Algorithm.HMAC256(jwtConfig.getKey()));
+        return JWT.create().withAudience(userId).withExpiresAt(expireDate).sign(Algorithm.HMAC256(jwtConfig.getKey()));
     }
 
     @Override

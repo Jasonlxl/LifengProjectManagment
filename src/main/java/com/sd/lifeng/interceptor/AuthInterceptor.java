@@ -5,16 +5,13 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.Verification;
 import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.config.JwtConfig;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IUserCategoryService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import org.apache.catalina.LifecycleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -58,6 +55,16 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new LiFengException(ResultCodeEnum.TOKEN_MISS);
                 }
 
+
+                //验证token
+                JWTVerifier jwtVerifier=JWT.require(Algorithm.HMAC256((jwtConfig.getKey()))).build();
+                try {
+                    jwtVerifier.verify(token);
+                }catch (JWTVerificationException e){
+                    throw new LiFengException(ResultCodeEnum.SERVER_EXCEPTION.getCode(),"jwt解析异常");
+                }
+
+
                 //获取token中的userId
                 String userId;
                 LocalDateTime expireTime=JWT.decode(token).getExpiresAt().toInstant().atZone( ZoneId.systemDefault() ).toLocalDateTime();;
@@ -80,13 +87,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
                 }
 
-                //验证token
-                JWTVerifier jwtVerifier=JWT.require(Algorithm.HMAC256((jwtConfig.getKey()))).build();
-                try {
-                    jwtVerifier.verify(token);
-                }catch (JWTVerificationException e){
-                    throw new LiFengException(ResultCodeEnum.SERVER_EXCEPTION.getCode(),"jwt解析异常");
-                }
+
                 return true;
             }
         }

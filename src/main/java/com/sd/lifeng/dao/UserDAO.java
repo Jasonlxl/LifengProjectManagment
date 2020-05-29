@@ -298,9 +298,6 @@ public class UserDAO {
      * @Return int
      */
     public int changeUserPassword(int userId,String password){
-        //todo  更新一直不成功
-    System.out.println(userId);
-    System.out.println(password);
         String sql="update pro_users set passwd =? where id =?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,password);

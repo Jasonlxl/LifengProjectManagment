@@ -1,5 +1,6 @@
 package com.sd.lifeng.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.util.ResultVOUtil;
@@ -52,5 +53,13 @@ public class SystemAuthorityController extends BaseController{
         return ResultVOUtil.success();
     }
 
+    @PostMapping("/removeUserRole")
+    @VerifyToken
+    public ResultVO removeUserRole(@RequestBody @Valid UserRoleVO requestVO, BindingResult bindingResult){
+        logger.info("【移除用户角色请求】参数列表：{}",requestVO);
+        dealBindingResult("移除用户角色",requestVO,bindingResult);
+        systemAuthorityService.removeUserRole(requestVO.getUserId(),requestVO.getRoleId());
+        return ResultVOUtil.success();
+    }
 
 }

@@ -2,9 +2,11 @@ package com.sd.lifeng.serviceImpl;
 
 import com.sd.lifeng.dao.SystemAuthorityDAO;
 import com.sd.lifeng.domain.SystemRolesDO;
+import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ISystemAuthorityService;
+import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.vo.auth.ResourceVO;
 import com.sd.lifeng.vo.auth.RoleVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
 
     @Autowired
     private SystemAuthorityDAO systemAuthorityDAO;
+
+    @Autowired
+    private IUserCategoryService userCategoryService;
 
     @Override
     public List<RoleVO> getRoleList() {
@@ -51,6 +56,16 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
     @Override
     public void insertUserRole(int userId, int roleId) {
         int row;
+        UserDO userDO = userCategoryService.findUserById(userId);
+        if(userDO == null){
+            throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
+        }
+
+        SystemRolesDO rolesDO = systemAuthorityDAO.getRoleById(roleId);
+        if(rolesDO == null){
+            throw new LiFengException(ResultCodeEnum.ROLE_NOT_EXIST);
+        }
+
         row=systemAuthorityDAO.addUserRole(userId,roleId);
         if(row == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
@@ -61,6 +76,18 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
     public void insertRoleResource(int roleId, int resourceId) {
         int row;
         row=systemAuthorityDAO.addRoleResource(roleId,resourceId);
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public void removeUserRole(int userId, int roleId) {
+        int row;
+        if(!systemAuthorityDAO.getUserRoleByUserIdAndRoleId(userId,roleId)){
+            throw new LiFengException(ResultCodeEnum.USER_ROLE_NOT_EXIST);
+        }
+        row=systemAuthorityDAO.removeUserRole(userId,roleId);
         if(row == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }

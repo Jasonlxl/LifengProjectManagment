@@ -60,8 +60,8 @@ public class ProjectManageController {
      */
     @ResponseBody
     @PostMapping("/querysource")
-    public JSONObject querySource(@RequestBody String req){
-        logger.info("【查询静态资源字典】:"+req);
+    public JSONObject querySource(){
+        logger.info("【查询静态资源字典】:");
         //查询静态资源
         JSONObject response = projectManageService.querySource();
         logger.info("response:"+response);
@@ -92,8 +92,8 @@ public class ProjectManageController {
      */
     @ResponseBody
     @PostMapping("/querytimeline")
-    public JSONObject queryTimeline(@RequestBody String req){
-        logger.info("【查询时间线字典】:"+req);
+    public JSONObject queryTimeline(){
+        logger.info("【查询时间线字典】:");
         //查询时间线资源
         JSONObject response = projectManageService.queryTimeline();
         logger.info("response:"+response);
@@ -124,8 +124,8 @@ public class ProjectManageController {
      */
     @ResponseBody
     @PostMapping("/queryunitpart")
-    public JSONObject queryUnitPart(@RequestBody String req){
-        logger.info("【查询单位-分部字典】:"+req);
+    public JSONObject queryUnitPart(){
+        logger.info("【查询单位-分部字典】:");
         //查询单元-分部
         JSONObject response = projectManageService.queryUnitPart();
         logger.info("response:"+response);
@@ -156,8 +156,8 @@ public class ProjectManageController {
      */
     @ResponseBody
     @PostMapping("/querycent")
-    public JSONObject queryCent(@RequestBody String req){
-        logger.info("【查询单元字典】:"+req);
+    public JSONObject queryCent(){
+        logger.info("【查询单元字典】:");
         //查询单位
         JSONObject response = projectManageService.queryCent();
         logger.info("response:"+response);

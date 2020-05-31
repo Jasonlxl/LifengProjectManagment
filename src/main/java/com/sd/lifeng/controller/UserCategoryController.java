@@ -41,7 +41,7 @@ public class UserCategoryController extends BaseController{
     public ResultVO userAudit(@RequestBody @Valid UserAuditVO requestVO, BindingResult bindingResult){
         logger.info("【用户审核请求】参数列表：{}",requestVO);
         dealBindingResult("用户审核",requestVO,bindingResult);
-        userCategoryService.userAudit(requestVO.getUserName(),requestVO.getStatus(),requestVO.getUserTypeId());
+        userCategoryService.userAudit(requestVO.getUserName(),requestVO.getStatus(),requestVO.getUserTypeId(),requestVO.getRoleId());
         return ResultVOUtil.success();
     }
 
@@ -106,7 +106,7 @@ public class UserCategoryController extends BaseController{
     @VerifyToken
     public ResultVO changePassword(@RequestBody @Valid ChangePasswordVO requestVO, BindingResult bindingResult){
         dealBindingResult("修改密码",requestVO,bindingResult);
-        userCategoryService.changePassword(requestVO.getNewPassword());
+        userCategoryService.changePassword(requestVO.getOldPassword(),requestVO.getNewPassword());
         return ResultVOUtil.success();
     }
 

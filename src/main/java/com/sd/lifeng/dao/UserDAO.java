@@ -14,9 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.*;
 
 @Repository
@@ -173,16 +177,19 @@ public class UserDAO {
     }
 
     public int insertUser(UserDTO userDTO){
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql="insert into pro_users (telno,passwd,salt,realname,user_type_id,remark) values (?,?,?,?,?,?)";
-        int rows=jdbcTemplate.update(sql, preparedStatement -> {
-            preparedStatement.setString(1,userDTO.getUserName());
-            preparedStatement.setString(2,userDTO.getPassword());
-            preparedStatement.setString(3,userDTO.getSalt());
-            preparedStatement.setString(4,userDTO.getRealName());
-            preparedStatement.setInt(5,userDTO.getType());
-            preparedStatement.setString(6,userDTO.getRemark());
-        });
-        return rows;
+        int userID = jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1,userDTO.getUserName());
+            ps.setString(2,userDTO.getPassword());
+            ps.setString(3,userDTO.getSalt());
+            ps.setString(4,userDTO.getRealName());
+            ps.setInt(5,userDTO.getType());
+            ps.setString(6,userDTO.getRemark());
+            return ps;
+        },keyHolder);
+        return userID;
     }
 
     /**

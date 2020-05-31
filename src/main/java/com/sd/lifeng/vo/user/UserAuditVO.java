@@ -17,6 +17,6 @@ public class UserAuditVO {
     private String userName;
     @NotNull(message = "审核状态不能为空")
     private Integer status;
-
     private int userTypeId;
+    private int roleId;
 }

@@ -8,6 +8,7 @@ import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.enums.UserAuditEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ICommonService;
+import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.service.ITokenService;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
@@ -42,6 +43,9 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
 
     @Autowired
     private ITokenService tokenService;
+
+    @Autowired
+    private ISystemAuthorityService systemAuthorityService;
 
 
     /**
@@ -119,8 +123,14 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     }
 
     @Override
-    public void changePassword(String newPassword) {
+    public void changePassword(String oldPassword,String newPassword) {
         UserDO userDO=commonService.getUserInfo();
+        //校验旧密码是否一样
+        String oldFinalPassword=DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + oldPassword);
+        if(!oldFinalPassword.equals(userDO.getPasswd())){
+            throw new LiFengException(ResultCodeEnum.USER_PASSWORD_ERROR);
+        }
+
         //生成新密码
         String finalPassword= DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + newPassword);
         int flag=userDAO.changeUserPassword(userDO.getId(),finalPassword);
@@ -132,10 +142,11 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     @Override
     public void resetPassword(int userId, String newPassword) {
         //只有管理员才可以重置密码
-        UserDO userDO=commonService.getUserInfo();
         if(! commonService.isSystemManager()){
-            throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_RESET_PASSWORD);
+            throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_OPERATE);
         }
+
+        UserDO userDO=commonService.getUserInfo();
         if(newPassword == null){
             newPassword = "123456";
         }
@@ -165,9 +176,14 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
 
     @Override
     @Transactional
-    public void userAudit(String userName, int status, int userTypeId) {
+    public void userAudit(String userName, int status, int userTypeId, int roleId) {
+        //非管理员无法进行审核
+        if(! commonService.isSystemManager()){
+            throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_OPERATE);
+        }
+
         RegisterDO registerDO=userDAO.getRegisterUserByPhone(userName);
-        if(registerDO.getStatus() == UserAuditEnum.AUDIT_SUCCESS.getValue()){
+        if(registerDO.getStatus().equals(UserAuditEnum.AUDIT_SUCCESS.getValue())){
             throw new LiFengException(ResultCodeEnum.USER_HAS_AUDITED);
         }
         int row=userDAO.changeUserStatus(userName,status);
@@ -187,10 +203,13 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
             userDTO.setRealName(registerDO.getRealName());
             userDTO.setType(userTypeId);
       System.out.println(userDTO);
-             row=userDAO.insertUser(userDTO);
-            if(row == 0){
+             int userId=userDAO.insertUser(userDTO);
+            if(userId == 0){
                 throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
             }
+
+            //分配用户角色
+            systemAuthorityService.insertUserRole(userId,roleId);
         }
 
 

@@ -41,12 +41,13 @@ public interface IUserCategoryService {
 
     /**
      * @Description 修改密码
+     * @param oldPassword 旧密码
      * @param newPassword 新密码
      * @Auther bmr
      * @Date 2020/5/24 : 8:51 :51
      * @Return void
      */
-    void changePassword(String newPassword);
+    void changePassword(String oldPassword,String newPassword);
 
     /**
      * @Description 重置用户密码
@@ -80,9 +81,10 @@ public interface IUserCategoryService {
      * @param userName 用户名
      * @param status 审核状态
      * @param userTypeId 用户类型id
+     * @param roleId 角色id
      * @author bmr
      * @date 2020/5/27 : 9:01 :51
      * @return void
      */
-    void userAudit(String userName,int status,int userTypeId);
+    void userAudit(String userName,int status,int userTypeId,int roleId);
 }

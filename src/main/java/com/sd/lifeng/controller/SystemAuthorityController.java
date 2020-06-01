@@ -5,6 +5,7 @@ import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.vo.ResultVO;
+import com.sd.lifeng.vo.auth.RoleResourceVO;
 import com.sd.lifeng.vo.auth.UserRoleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,15 @@ public class SystemAuthorityController extends BaseController{
         logger.info("【移除用户角色请求】参数列表：{}",requestVO);
         dealBindingResult("移除用户角色",requestVO,bindingResult);
         systemAuthorityService.removeUserRole(requestVO.getUserId(),requestVO.getRoleId());
+        return ResultVOUtil.success();
+    }
+
+    @PostMapping("/addRoleResource")
+    @VerifyToken
+    public ResultVO addUserRole(@RequestBody @Valid RoleResourceVO requestVO, BindingResult bindingResult){
+        logger.info("【为角色分配资源请求】参数列表：{}",requestVO);
+        dealBindingResult("角色分配资源",requestVO,bindingResult);
+        systemAuthorityService.insertRoleResource(requestVO.getRoleId(),requestVO.getResourceId());
         return ResultVOUtil.success();
     }
 

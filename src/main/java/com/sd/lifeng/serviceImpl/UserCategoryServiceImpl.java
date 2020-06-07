@@ -142,7 +142,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     @Override
     public void resetPassword(int userId, String newPassword) {
         //只有管理员才可以重置密码
-        if(! commonService.isSystemManager()){
+        if(! userDAO.isSystemManagerByUserId(tokenService.getUserId())){
             throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_OPERATE);
         }
 
@@ -178,7 +178,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     @Transactional
     public void userAudit(String userName, int status, int userTypeId, int roleId) {
         //非管理员无法进行审核
-        if(! commonService.isSystemManager()){
+        if(! userDAO.isSystemManagerByUserId(tokenService.getUserId())){
             throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_OPERATE);
         }
 

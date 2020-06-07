@@ -38,22 +38,4 @@ public class ICommonServiceImpl implements ICommonService {
         return tokenService.getUserId();
     }
 
-    @Override
-    public boolean isSystemManager() {
-        boolean flag = false;
-        int userId=this.getUserId();
-        LoginResponseVO responseVO=userDAO.getUserDetailById(userId);
-        Set<RoleVO> roleVOList=responseVO.getRoleVOList();
-        if(CollectionUtils.isEmpty(roleVOList)){
-            return false;
-        }
-
-        for(RoleVO roleVO : roleVOList){
-            if(roleVO.getSystemManager() == 1){
-                flag = true;
-                break;
-            }
-        }
-        return flag;
-    }
 }

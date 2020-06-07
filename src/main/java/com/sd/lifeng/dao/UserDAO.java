@@ -4,6 +4,8 @@ import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.UserAuditEnum;
+import com.sd.lifeng.service.ICommonService;
+import com.sd.lifeng.service.ITokenService;
 import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.RegisterResponseVO;
 import com.sd.lifeng.vo.auth.ResourceVO;
@@ -13,6 +15,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -30,6 +33,33 @@ public class UserDAO {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private SystemAuthorityDAO authorityDAO;
+
+    /**
+     * @description 获取传递过来的用户是否为系统管理员
+     * @author bmr
+     * @param userId 用户id
+     * @date 2020/5/28 : 18:26 :51
+     * @return boolean
+     */
+    public boolean isSystemManagerByUserId(Integer userId) {
+        boolean flag = false;
+        LoginResponseVO responseVO=this.getUserDetailById(userId);
+        Set<RoleVO> roleVOList=responseVO.getRoleVOList();
+        if(CollectionUtils.isEmpty(roleVOList)){
+            return false;
+        }
+
+        for(RoleVO roleVO : roleVOList){
+            if(roleVO.getSystemManager() == 1){
+                flag = true;
+                break;
+            }
+        }
+        return flag;
+    }
 
     /**
      * 根据用户名密码获取用户信息
@@ -218,8 +248,12 @@ public class UserDAO {
             userListVOList.add(userListVO);
         }
         for (UserListVO userListVO : userListVOList){
+            //如果是管理员角色，那么就需要查询所有的资源列表
+            boolean isManage=this.isSystemManagerByUserId(userListVO.getUserId());
+
             for(Map<String,Object> map:list){
                 int userId=Integer.parseInt(map.get("id").toString());
+
                 if(userListVO.getUserId() == userId){
                     if(map.get("role_id") != null){
                         RoleVO roleVO=new RoleVO();
@@ -227,13 +261,25 @@ public class UserDAO {
                         roleVO.setRoleName(map.get("role_name").toString());
                         userListVO.getRoleList().add(roleVO);
 
-                        ResourceVO resourceVO=new ResourceVO();
-                        resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
-                        resourceVO.setResourceName(map.get("resource_name").toString());
-                        resourceVO.setResourceUrl(map.get("resource_url").toString());
-                        userListVO.getResourceList().add(resourceVO);
+                        if(!isManage){
+                            //非管理员用户，添加拥有的角色的对应资源，管理员不用添加，最后统一返回全部资源
+                            ResourceVO resourceVO=new ResourceVO();
+                            resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
+                            resourceVO.setResourceName(map.get("resource_name").toString());
+                            resourceVO.setResourceUrl(map.get("resource_url").toString());
+                            userListVO.getResourceList().add(resourceVO);
+                        }
+
                     }
 
+                }
+            }
+
+            if(isManage){
+                //管理员返回所有资源
+                List<ResourceVO> resourceList=authorityDAO.getResourceList();
+                for(ResourceVO resourceVO:resourceList){
+                    userListVO.getResourceList().add(resourceVO);
                 }
             }
         }

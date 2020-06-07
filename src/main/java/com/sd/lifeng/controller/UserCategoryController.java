@@ -80,7 +80,7 @@ public class UserCategoryController extends BaseController{
      * @return
      */
     @PostMapping("/getUserList")
-//    @VerifyToken
+    @VerifyToken
     public ResultVO getUserList(){
         return ResultVOUtil.success(userCategoryService.getUserList() );
     }

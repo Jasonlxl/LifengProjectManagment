@@ -82,6 +82,7 @@ public class UserCategoryController extends BaseController{
     @PostMapping("/getUserList")
     @VerifyToken
     public ResultVO getUserList(){
+        logger.info("【获取用户列表】");
         return ResultVOUtil.success(userCategoryService.getUserList() );
     }
 

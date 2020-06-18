@@ -1,6 +1,7 @@
 package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
@@ -30,6 +31,7 @@ public class ProjectManageController {
      */
     @ResponseBody
     @PostMapping("/addnewpro")
+    @VerifyToken
     public JSONObject register(@RequestBody @Valid NewProjectVO newProjectVO, BindingResult bindingResult){
         logger.info("addnewpro send into msg :"+newProjectVO);
         JSONObject response = new JSONObject();

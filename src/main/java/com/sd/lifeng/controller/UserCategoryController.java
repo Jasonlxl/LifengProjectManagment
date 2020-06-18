@@ -45,6 +45,15 @@ public class UserCategoryController extends BaseController{
         return ResultVOUtil.success();
     }
 
+    @PostMapping("/addUser")
+    @VerifyToken
+    public ResultVO addUser(@RequestBody @Valid UserAddVO requestVO, BindingResult bindingResult){
+        logger.info("【添加用户请求】参数列表：{}",requestVO);
+        dealBindingResult("添加用户请求",requestVO,bindingResult);
+
+        userCategoryService.addUser(requestVO);
+        return ResultVOUtil.success("添加成功");
+    }
     /**
      * 用户登录
      * @param requestVO

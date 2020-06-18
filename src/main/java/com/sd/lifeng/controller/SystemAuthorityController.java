@@ -1,6 +1,5 @@
 package com.sd.lifeng.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.util.ResultVOUtil;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * @author bmr

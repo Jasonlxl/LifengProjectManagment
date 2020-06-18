@@ -5,14 +5,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.domain.ProjectDO;
 import com.sd.lifeng.service.IProjectManageService;
-import com.sd.lifeng.util.DateUtil;
-import com.sd.lifeng.vo.*;
+import com.sd.lifeng.vo.project.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +30,13 @@ public class ProjectManageServiceImpl implements IProjectManageService {
      */
     public boolean repeatCheck(String projectName, int roleId){
         return projectDAO.getRecordByProjectNameAndRoleId(projectName,roleId);
+    }
+
+    /*
+    根据项目串号判断是否可以编辑
+     */
+    public boolean editCheck(String projectHash){
+        return projectDAO.checkProjectStatus(projectHash);
     }
 
     /*

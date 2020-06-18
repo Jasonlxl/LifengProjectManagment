@@ -2,11 +2,9 @@ package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
-import com.sd.lifeng.enums.ResultCodeEnum;
-import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.ResultVOUtil;
-import com.sd.lifeng.vo.*;
+import com.sd.lifeng.vo.ResultVO;
 import com.sd.lifeng.vo.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/lifeng/userCtl")

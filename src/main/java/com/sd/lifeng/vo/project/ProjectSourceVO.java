@@ -1,4 +1,4 @@
-package com.sd.lifeng.vo;
+package com.sd.lifeng.vo.project;
 
 import com.alibaba.fastjson.JSONArray;
 import lombok.Data;

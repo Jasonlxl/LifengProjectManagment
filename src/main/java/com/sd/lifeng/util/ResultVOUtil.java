@@ -1,12 +1,8 @@
 package com.sd.lifeng.util;
 
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.vo.ResultVO;
-
-import java.util.Map;
 
 /**
  * @author bmr

@@ -5,7 +5,7 @@ import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
-import com.sd.lifeng.vo.*;
+import com.sd.lifeng.vo.project.*;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,8 +83,19 @@ public class ProjectManageController {
             throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
+
         //新增静态资源
-        JSONObject response = projectManageService.addProjectSource(projectSourceVO);
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectSourceVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectManageService.addProjectSource(projectSourceVO);
         logger.info("response:"+response);
         return response;
     }
@@ -116,7 +127,17 @@ public class ProjectManageController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增时间线资源
-        JSONObject response = projectManageService.addProjectTimeline(projectTimelineVO);
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectTimelineVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectManageService.addProjectTimeline(projectTimelineVO);
         logger.info("response:"+response);
         return response;
     }
@@ -148,7 +169,17 @@ public class ProjectManageController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增单元-分部
-        JSONObject response = projectManageService.addProjectUnitPart(projectUnitPartVO);
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectUnitPartVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectManageService.addProjectUnitPart(projectUnitPartVO);
         logger.info("response:"+response);
         return response;
     }
@@ -213,7 +244,17 @@ public class ProjectManageController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增分部-单元
-        JSONObject response = projectManageService.addProjectPartCent(projectPartCentVO);
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectPartCentVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectManageService.addProjectPartCent(projectPartCentVO);
         logger.info("response:"+response);
         return response;
     }

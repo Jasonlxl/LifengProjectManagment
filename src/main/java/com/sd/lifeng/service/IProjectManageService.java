@@ -1,13 +1,18 @@
 package com.sd.lifeng.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sd.lifeng.vo.*;
+import com.sd.lifeng.vo.project.*;
 
 public interface IProjectManageService {
     /*
     根据项目名称、甲方角色id判重
      */
     public boolean repeatCheck(String projectName, int roleId);
+
+    /*
+    根据项目串号判断是否可以编辑
+     */
+    public boolean editCheck(String projectHash);
 
     /*
     新增项目方法

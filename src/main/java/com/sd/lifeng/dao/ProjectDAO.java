@@ -54,14 +54,14 @@ public class ProjectDAO {
         Object[] params = new Object[] { projectHash};
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
-//        logger.info("check list :"+list);
+        logger.info("check list :"+list);
 
         if(list == null || list.size() == 0){
             //不存在记录
             return true;
         }else{
-//            logger.info("status:"+list.get(0).get("status"));
-            if(!"0".equals(list.get(0).get("status"))){
+            logger.info("status:"+list.get(0).get("status"));
+            if((int)list.get(0).get("status") != 0){
                 //项目不可编辑
                 return true;
             }
@@ -416,5 +416,27 @@ public class ProjectDAO {
             }
         }
         return res.length;
+    }
+
+    /**
+     * @Description 查询pro_project_unit_part表--单位
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryUnitforProject(String projecthash){
+        String sql="SELECT DISTINCT unit_name FROM pro_project_unit_part where projecthash=?";
+        Object[] params = new Object[] {projecthash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 查询pro_project_unit_part表--分部
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryPartforProject(String projecthash,String unitName){
+        String sql="SELECT part_name from pro_project_unit_part where projecthash=? and unit_name=?";
+        Object[] params = new Object[] {projecthash,unitName};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
     }
 }

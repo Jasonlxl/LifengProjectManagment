@@ -29,9 +29,37 @@ public class ProjectEditServiceImpl implements IProjectEditService {
    */
     public JSONObject queryUnitPart(String projectHash){
         JSONObject result = new JSONObject();
-        JSONArray finalArray = new JSONArray();
+        JSONArray finalArray;
         //先获取单位分部字典集
         JSONArray unitPartDic = projectManageService.queryUnitPart().getJSONObject("data").getJSONArray("unit_part");
+        //将字典的每个分部都设置check=0
+        JSONArray addCheckArray = new JSONArray();
+        //操作unitPartDic转化为addCheckArray
+        //生成唯一id
+        int serno = 0;
+        int unit_id = 0;
+        for(int i = 0; i< unitPartDic.size(); i++){
+            JSONObject upObject = new JSONObject();
+            serno++;
+            unit_id = serno;//存储unit_id
+            upObject.put("id",serno);
+            upObject.put("unit_name",unitPartDic.getJSONObject(i).getString("unit_name"));
+
+            JSONArray array = new JSONArray();
+            JSONArray partList = unitPartDic.getJSONObject(i).getJSONArray("children");
+            for(int j = 0; j<partList.size(); j++){
+                JSONObject object = new JSONObject();
+                serno++;
+                object.put("id",serno);
+                object.put("part_name",partList.getJSONObject(j).get("part_name"));
+                object.put("unit_id",unit_id);
+                object.put("check",0);
+                array.add(object);
+            }
+            upObject.put("children",array);
+            addCheckArray.add(upObject);
+        }
+        logger.info("addCheckArray:"+addCheckArray);
 
         //再获取在途项目的单位分部集
         JSONArray projectUnitPartDic = new JSONArray();
@@ -39,28 +67,57 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         List<Map<String, Object>> list = projectDAO.queryUnitforProject(projectHash);
 
         if(list == null || list.size() == 0){
-            //在途项目未配置单位，必然也没有分部，直接将字典的每个分部都设置check=0
-            //操作unitPartDic转化为finalArray
-
+            //在途项目未配置单位，必然也没有分部，直接将addCheckArray赋给finalArray
+            finalArray = addCheckArray;
         }else{
             //再查在途项目每个单位的所有分部
+            //生成唯一id
+            serno = 0;
             for(int i = 0; i<list.size(); i++){
                 JSONObject upObject = new JSONObject();
+                serno++;
+                unit_id = serno;//存储unit_id
+                upObject.put("id",serno);
+                upObject.put("unit_name",list.get(i).get("unit_name"));
+
                 JSONArray array = new JSONArray();
                 List<Map<String, Object>> partList = projectDAO.queryPartforProject(projectHash, (String) list.get(i).get("unit_name"));
-                addPartName(partList, array,i+1);
-                upObject.put("id",i+1);
-                upObject.put("unit_name",list.get(i).get("unit_name"));
+                for(int j = 0; j<partList.size(); j++){
+                    JSONObject object = new JSONObject();
+                    serno++;
+                    object.put("id",serno);
+                    object.put("part_name",partList.get(j).get("part_name"));
+                    object.put("unit_id",unit_id);
+                    array.add(object);
+                }
                 upObject.put("children",array);
                 projectUnitPartDic.add(upObject);
             }
             logger.info("projectUnitPartDic:"+projectUnitPartDic);
-            finalArray = projectUnitPartDic;
-            //对比遍历projectUnitPartDic和unitPartDic，并将unitPartDic转化为finalArray
-
-
-
-
+            //对比遍历projectUnitPartDic和addCheckArray，并将addCheckArray转化为finalArray
+            String unit_name;
+            String part_name;
+            for(int projectUnit = 0; projectUnit<projectUnitPartDic.size(); projectUnit++){
+                unit_name = projectUnitPartDic.getJSONObject(projectUnit).getString("unit_name");
+                for(int dicUnit = 0; dicUnit<addCheckArray.size(); dicUnit++){
+                    if(unit_name.equals(addCheckArray.getJSONObject(dicUnit).getString("unit_name"))){
+                        //匹配到了已选择的unit，开始处理part
+                        JSONArray pChildren = projectUnitPartDic.getJSONObject(projectUnit).getJSONArray("children");
+                        for(int projectPart = 0; projectPart<pChildren.size(); projectPart++){
+                            part_name = pChildren.getJSONObject(projectPart).getString("part_name");
+                            JSONArray dChildren = addCheckArray.getJSONObject(dicUnit).getJSONArray("children");
+                            for(int dicPart = 0; dicPart<dChildren.size(); dicPart++){
+                                if(part_name.equals(dChildren.getJSONObject(dicPart).getString("part_name"))){
+                                    //匹配到了已选择的part,调整check=1
+                                    addCheckArray.getJSONObject(dicUnit).getJSONArray("children").getJSONObject(dicPart).put("check",1);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            logger.info("addCheckArray:"+addCheckArray);
+            finalArray = addCheckArray;
         }
 
         JSONObject finalObject = new JSONObject();
@@ -70,21 +127,6 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         result.put("msg","success");
         result.put("data",finalObject);
         return result;
-    }
-
-    /*
-    封装分部列表公共方法
-     */
-    private void addPartName(List<Map<String, Object>> list, JSONArray array,int unit_id) {
-        for(int i = 0; i<list.size(); i++){
-            JSONObject object = new JSONObject();
-            object.put("id",i+1);
-            object.put("part_name",list.get(i).get("part_name"));
-            if(unit_id != 0) {
-                object.put("unit_id",unit_id);
-            }
-            array.add(object);
-        }
     }
 
 }

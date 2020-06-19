@@ -22,6 +22,7 @@ public enum ResultCodeEnum {
     LOGIN_ERROR("16","用户名密码错误"),
     ROLE_NOT_EXIST("17","角色不存在"),
     USER_ROLE_NOT_EXIST("18","用户未分配该角色，不能移除"),
+    ROLE_RESOURCE_NOT_EXIST("18","角色未分配该资源，不能移除"),
     USER_PASSWORD_ERROR("18","用户密码不正确"),
     ONLY_MANAGER_CAN_OPERATE("17","非系统管理员，权限不足"),
     DATA_BASE_UPDATE_ERROR("100","数据库更新数据失败");

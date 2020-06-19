@@ -1,6 +1,9 @@
 package com.sd.lifeng.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
+import com.sd.lifeng.enums.ResultCodeEnum;
+import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.vo.ResultVO;
@@ -10,12 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Objects;
 
 /**
  * @author bmr
@@ -70,4 +71,34 @@ public class SystemAuthorityController extends BaseController{
         return ResultVOUtil.success();
     }
 
+    @PostMapping("/getUserRoles")
+    @VerifyToken
+    public ResultVO getUserRoles(@RequestBody JSONObject req){
+        logger.info("【获取用户所有角色列表请求】参数列表：{}",req);
+        int userId = req.getInteger("userId");
+        if(userId <= 0){
+            return ResultVOUtil.error(ResultCodeEnum.PARAM_ERROR.getCode(),"userId不能为空");
+        }
+        return ResultVOUtil.success(systemAuthorityService.getUserRoles(userId));
+    }
+
+    @PostMapping("/getRoleResources")
+    @VerifyToken
+    public ResultVO getRoleResources(@RequestBody JSONObject req){
+        logger.info("【获取角色下所有资源列表请求】参数列表：{}",req);
+        int roleId = req.getInteger("roleId");
+        if(roleId <= 0){
+            return ResultVOUtil.error(ResultCodeEnum.PARAM_ERROR.getCode(),"roleId不能为空");
+        }
+        return ResultVOUtil.success(systemAuthorityService.getRoleResources(roleId));
+    }
+
+    @PostMapping("/removeRoleResource")
+    @VerifyToken
+    public ResultVO removeRoleResource(@RequestBody @Valid RoleResourceVO requestVO, BindingResult bindingResult){
+        logger.info("【移除角色资源请求】参数列表：{}",requestVO);
+        dealBindingResult("移除角色资源",requestVO,bindingResult);
+        systemAuthorityService.removeRoleResource(requestVO.getRoleId(),requestVO.getResourceId());
+        return ResultVOUtil.success();
+    }
 }

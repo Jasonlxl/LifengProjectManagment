@@ -16,7 +16,7 @@ public interface ISystemAuthorityService {
     /**
      * @Description 获取系统角色列表
      * @Auther bmr
-     * @Date 2020/5/25 : 8:41 :51 
+     * @Date 2020/5/25 : 8:41 :51
      * @Return java.util.List<com.sd.lifeng.vo.auth.RoleVO>
      */
     List<RoleVO> getRoleList();
@@ -66,4 +66,27 @@ public interface ISystemAuthorityService {
      * @return void
      */
     void removeUserRole(int userId,int roleId);
+
+    /**
+     * 获取用户的角色列表
+     * @param userId 用户id
+     * @return
+     */
+    List<RoleVO> getUserRoles(int userId);
+
+    /**
+     * 获取角色下的所有资源列表
+     * @param roleId 角色id
+     * @return
+     */
+    List<ResourceVO> getRoleResources(int roleId);
+    /**
+     * @description 移除角色资源
+     * @param roleId 角色id
+     * @param resourceId 资源id
+     * @author bmr
+     * @date 2020/5/26 : 17:26 :51
+     * @return void
+     */
+    void removeRoleResource(int roleId,int resourceId);
 }

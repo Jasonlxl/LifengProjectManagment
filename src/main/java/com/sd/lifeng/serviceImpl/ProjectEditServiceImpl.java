@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
+import com.sd.lifeng.vo.project.EditProjectDetailVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,26 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         result.put("code","0");
         result.put("msg","success");
 
+        return result;
+    }
+
+    /*
+   编辑在途项目详情
+   */
+    public JSONObject editProjectDetail(EditProjectDetailVO editProjectDetailVO){
+        JSONObject result = new JSONObject();
+        int rows = projectDAO.updateProjectDetail(editProjectDetailVO);
+        if(rows>0){
+            result.put("code","0");
+            result.put("msg","success");
+            JSONObject projecthash = new JSONObject();
+            projecthash.put("projectHash",editProjectDetailVO.getProjectHash());
+            result.put("data",projecthash);
+        }else{
+            result.put("code","1015");
+            result.put("msg","项目更新失败");
+            result.put("data",new JSONObject());
+        }
         return result;
     }
 

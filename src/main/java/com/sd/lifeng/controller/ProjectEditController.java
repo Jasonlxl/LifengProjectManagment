@@ -5,6 +5,7 @@ import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
+import com.sd.lifeng.vo.project.EditProjectDetailVO;
 import com.sd.lifeng.vo.project.ProjectEditQueryUnitPartVO;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
@@ -58,6 +59,36 @@ public class ProjectEditController {
         }
         //查询时间线资源
         response = projectEditService.queryEditProject(userId);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    编辑在途项目详情
+     */
+    @ResponseBody
+    @PostMapping("/editprojectdetail")
+    public JSONObject editProjectDetail(@RequestBody @Valid EditProjectDetailVO editProjectDetailVO, BindingResult bindingResult){
+        logger.info("【编辑在途项目详情】:");
+
+        if(bindingResult.hasErrors()){
+            logger.error("【编辑在途项目详情】参数不正确，editProjectDetailVO={}",editProjectDetailVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //编辑在途项目详情
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(editProjectDetailVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","项目不存在");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.editProjectDetail(editProjectDetailVO);
         logger.info("response:"+response);
         return response;
     }

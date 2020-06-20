@@ -3,6 +3,7 @@ package com.sd.lifeng.dao;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.domain.ProjectDO;
+import com.sd.lifeng.vo.project.EditProjectDetailVO;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -473,5 +474,21 @@ public class ProjectDAO {
             list = jdbcTemplate.queryForList(sql,params);
         }
         return list;
+    }
+
+    /**
+     * @Description 更新项目详情pro_project_details
+     * @Auther Jason
+     */
+    public int updateProjectDetail(EditProjectDetailVO editProjectDetailVO){
+        String sql="update pro_project_details set project_name =?,role_id=?,rolename=?,project_addr=? where projecthash =?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setString(1,editProjectDetailVO.getProjectName());
+            preparedStatement.setInt(2,editProjectDetailVO.getRoleId());
+            preparedStatement.setString(3,editProjectDetailVO.getRoleName());
+            preparedStatement.setString(4,editProjectDetailVO.getProjectAddr());
+            preparedStatement.setString(5,editProjectDetailVO.getProjectHash());
+        });
+        return rows;
     }
 }

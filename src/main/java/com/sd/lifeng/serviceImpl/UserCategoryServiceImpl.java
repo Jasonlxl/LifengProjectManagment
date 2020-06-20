@@ -147,7 +147,7 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
             throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_OPERATE);
         }
 
-        UserDO userDO=commonService.getUserInfo();
+        UserDO userDO=userDAO.getUserById(userId);
         if(newPassword == null){
             newPassword = "123456";
         }

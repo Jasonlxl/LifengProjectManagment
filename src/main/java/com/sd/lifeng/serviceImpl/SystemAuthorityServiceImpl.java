@@ -92,4 +92,33 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }
     }
+
+    @Override
+    public List<RoleVO> getUserRoles(int userId) {
+        UserDO userDO = userCategoryService.findUserById(userId);
+        if(userDO == null){
+            throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
+        }
+        return systemAuthorityDAO.getRolesByUserId(userId);
+    }
+
+    @Override
+    public List<ResourceVO> getRoleResources(int roleId) {
+        if((systemAuthorityDAO.getRoleById(roleId)) == null){
+            throw new LiFengException(ResultCodeEnum.ROLE_NOT_EXIST);
+        }
+        return systemAuthorityDAO.getResourcesByRoleId(roleId);
+    }
+
+    @Override
+    public void removeRoleResource(int roleId, int resourceId) {
+        int row;
+        if(!systemAuthorityDAO.getRoleResourceByRoleIdAndResourceId(roleId,resourceId)){
+            throw new LiFengException(ResultCodeEnum.ROLE_RESOURCE_NOT_EXIST);
+        }
+        row=systemAuthorityDAO.removeRoleResource(roleId,resourceId);
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
 }

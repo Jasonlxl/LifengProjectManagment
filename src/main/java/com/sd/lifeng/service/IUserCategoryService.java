@@ -3,6 +3,7 @@ package com.sd.lifeng.service;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.RegisterResponseVO;
+import com.sd.lifeng.vo.user.UserAddVO;
 import com.sd.lifeng.vo.user.UserListVO;
 
 import java.util.List;
@@ -87,4 +88,13 @@ public interface IUserCategoryService {
      * @return void
      */
     void userAudit(String userName,int status,int userTypeId,int roleId);
+
+    /**
+     * @description 添加用户
+     * @param userAddVO 用户添加vo
+     * @author bmr
+     * @date 2020/5/27 : 9:01 :51
+     * @return void
+     */
+    void addUser(UserAddVO userAddVO);
 }

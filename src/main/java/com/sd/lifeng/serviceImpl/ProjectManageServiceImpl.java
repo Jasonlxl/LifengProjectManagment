@@ -5,14 +5,12 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.domain.ProjectDO;
 import com.sd.lifeng.service.IProjectManageService;
-import com.sd.lifeng.util.DateUtil;
-import com.sd.lifeng.vo.*;
+import com.sd.lifeng.vo.project.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +30,13 @@ public class ProjectManageServiceImpl implements IProjectManageService {
      */
     public boolean repeatCheck(String projectName, int roleId){
         return projectDAO.getRecordByProjectNameAndRoleId(projectName,roleId);
+    }
+
+    /*
+    根据项目串号判断是否可以编辑
+     */
+    public boolean editCheck(String projectHash){
+        return projectDAO.checkProjectStatus(projectHash);
     }
 
     /*
@@ -207,7 +212,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
                 JSONObject upObject = new JSONObject();
                 JSONArray array = new JSONArray();
                 List<Map<String, Object>> partList = projectDAO.queryPart((String) list.get(i).get("unit_name"));
-                addPartName(partList, array);
+                addPartName(partList, array,i+1);
                 upObject.put("id",i+1);
                 upObject.put("unit_name",list.get(i).get("unit_name"));
                 upObject.put("children",array);
@@ -303,7 +308,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
             result.put("msg","查询异常，该项目未添加任何单位-分部");
         }else{
             JSONArray array = new JSONArray();
-            addPartName(list, array);
+            addPartName(list, array,0);
             JSONObject projectPartList = new JSONObject();
             projectPartList.put("projectPartList",array);
             projectPartList.put("projectHash",projectHash);
@@ -345,11 +350,14 @@ public class ProjectManageServiceImpl implements IProjectManageService {
     /*
     封装分部列表公共方法
      */
-    private void addPartName(List<Map<String, Object>> list, JSONArray array) {
+    private void addPartName(List<Map<String, Object>> list, JSONArray array,int unit_id) {
         for(int i = 0; i<list.size(); i++){
             JSONObject object = new JSONObject();
             object.put("id",i+1);
             object.put("part_name",list.get(i).get("part_name"));
+            if(unit_id != 0) {
+                object.put("unit_id",unit_id);
+            }
             array.add(object);
         }
     }

@@ -34,7 +34,7 @@ public class ProjectDAO {
      * @param projectName,roleId 项目名称，角色id
      * @Auther Jason
      * @Date 2020/5/23 : 22:59 :51
-     * @Return com.sd.lifeng.domain.ProjectDAO
+     * @Return com.sd.lifeng.dao.ProjectDAO
      */
     public boolean getRecordByProjectNameAndRoleId(String projectName,int roleId){
         String sql="select id from pro_project_details where project_name = ? and role_id = ?";
@@ -43,6 +43,30 @@ public class ProjectDAO {
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
         //存在记录
         return list.size() > 0;
+    }
+
+    /**
+     * @Description 根据项目串号判断是否可以编辑
+     * @param projectHash 项目串号
+     */
+    public boolean checkProjectStatus(String projectHash){
+        String sql="select status from pro_project_details where projecthash = ?";
+        Object[] params = new Object[] { projectHash};
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        logger.info("check list :"+list);
+
+        if(list == null || list.size() == 0){
+            //不存在记录
+            return true;
+        }else{
+            logger.info("status:"+list.get(0).get("status"));
+            if((int)list.get(0).get("status") != 0){
+                //项目不可编辑
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -392,5 +416,27 @@ public class ProjectDAO {
             }
         }
         return res.length;
+    }
+
+    /**
+     * @Description 查询pro_project_unit_part表--单位
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryUnitforProject(String projecthash){
+        String sql="SELECT DISTINCT unit_name FROM pro_project_unit_part where projecthash=?";
+        Object[] params = new Object[] {projecthash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 查询pro_project_unit_part表--分部
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryPartforProject(String projecthash,String unitName){
+        String sql="SELECT part_name from pro_project_unit_part where projecthash=? and unit_name=?";
+        Object[] params = new Object[] {projecthash,unitName};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
     }
 }

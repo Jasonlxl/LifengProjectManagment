@@ -14,6 +14,7 @@ import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.RandomUtil;
 import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.RegisterResponseVO;
+import com.sd.lifeng.vo.user.UserAddVO;
 import com.sd.lifeng.vo.user.UserListVO;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -214,4 +215,41 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
 
 
     }
+
+    @Override
+    public void addUser(UserAddVO userAddVO) {
+        //非管理员无法进行添加用户
+        if(! userDAO.isSystemManagerByUserId(tokenService.getUserId())){
+            throw new LiFengException(ResultCodeEnum.ONLY_MANAGER_CAN_OPERATE);
+        }
+
+        UserDO userDO = userDAO.getUserByPhone(userAddVO.getUserName());
+        if(userDO != null){
+            throw new LiFengException(ResultCodeEnum.USER_HAS_REGISTERED);
+        }
+
+        //生成密码
+        String salt= RandomUtil.generatorRandom(4,2);
+        String finalPassword= DigestUtils.md5Hex(userAddVO.getUserName() + salt + userAddVO.getPassword());
+
+        //添加用户信息
+        UserDTO userDTO=new UserDTO();
+        userDTO.setUserName(userAddVO.getUserName());
+        userDTO.setPassword(finalPassword);
+        userDTO.setSalt(salt);
+        userDTO.setRealName(userAddVO.getRealName());
+        userDTO.setType(userAddVO.getUserTypeId());
+        userDTO.setRemark(userAddVO.getRemark());
+        System.out.println(userDTO);
+        int userId=userDAO.insertUser(userDTO);
+        if(userId == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+
+        //分配用户角色
+        systemAuthorityService.insertUserRole(userId,userAddVO.getRoleId());
+
+
+    }
+
 }

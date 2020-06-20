@@ -6,6 +6,7 @@ import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.project.ProjectEditQueryUnitPartVO;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,39 @@ public class ProjectEditController {
 
     @Autowired
     private IProjectManageService projectManageService;
+
+    /*
+   查询可编辑项目列表
+    */
+    @ResponseBody
+    @PostMapping("/queryeditproject")
+    public JSONObject queryEditProject(@RequestBody JSONObject req){
+        logger.info("【查询可编辑项目列表】:"+req);
+        JSONObject response = new JSONObject();
+
+        String userId;
+        try{
+            userId = req.getString("userId");
+
+            if(StringUtils.isBlank(userId)){
+                response.put("code","1014");
+                response.put("msg","用户ID不得为空");
+                logger.info("response:"+response);
+                return response;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            response.put("code","1010");
+            response.put("msg","数据包解析异常");
+            logger.info("response:"+response);
+            return response;
+        }
+        //查询时间线资源
+        response = projectEditService.queryEditProject(userId);
+        logger.info("response:"+response);
+        return response;
+    }
 
     /*
     查询单位-分部字典,并标注在途项目现有的分部

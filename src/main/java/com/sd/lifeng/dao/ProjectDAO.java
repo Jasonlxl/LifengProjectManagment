@@ -439,4 +439,39 @@ public class ProjectDAO {
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
         return list;
     }
+
+    /**
+     * @Description 联表查询pro_system_user_role表&pro_system_roles表，判断用户是否为管理员
+     * @Auther Jason
+     */
+    public Boolean checkAdmin(String userId){
+        String sql="SELECT system_manager from pro_system_user_role a RIGHT JOIN pro_system_roles b ON a.role_id=b.id WHERE user_id=?";
+        Object[] params = new Object[] {Integer.valueOf(userId)};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        if(list == null || list.size() == 0){
+            return false;
+        }else {
+            if ((int)list.get(0).get("system_manager") != 1){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @Description 查询pro_project_details表
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryEditProject(String userId, boolean flag){
+        List<Map<String, Object>> list;
+        if (flag){
+            String sql="select * from pro_project_details where status=0";
+            list = jdbcTemplate.queryForList(sql);
+        }else{
+            String sql="select * from pro_project_details where create_user=? and status=0";
+            Object[] params = new Object[] {userId};
+            list = jdbcTemplate.queryForList(sql,params);
+        }
+        return list;
+    }
 }

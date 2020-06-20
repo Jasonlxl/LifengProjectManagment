@@ -23,6 +23,39 @@ public class ProjectEditServiceImpl implements IProjectEditService {
 
     @Autowired
     private IProjectManageService projectManageService;
+    /*
+   查询单位-分部方法，并标注已存在的单位分部
+   */
+    public JSONObject queryEditProject(String userId){
+        JSONObject result = new JSONObject();
+        //先查用户是否为管理员
+        Boolean flag = projectDAO.checkAdmin(userId);
+        //再查可编辑项目集
+        List<Map<String, Object>> list = projectDAO.queryEditProject(userId,flag);
+
+        JSONArray array = new JSONArray();
+        if(list == null || list.size() == 0){
+            result.put("data",new JSONArray());
+        }else{
+            for(int i=0; i<list.size(); i++){
+                JSONObject projectDetail = new JSONObject();
+                projectDetail.put("id",list.get(i).get("id"));
+                projectDetail.put("projecthash",list.get(i).get("projecthash"));
+                projectDetail.put("project_name",list.get(i).get("project_name"));
+                projectDetail.put("create_user",list.get(i).get("create_user"));
+                projectDetail.put("role_id",list.get(i).get("role_id"));
+                projectDetail.put("rolename",list.get(i).get("rolename"));
+                projectDetail.put("createdate",list.get(i).get("createdate"));
+                projectDetail.put("project_addr",list.get(i).get("project_addr"));
+                array.add(projectDetail);
+            }
+            result.put("data",array);
+        }
+        result.put("code","0");
+        result.put("msg","success");
+
+        return result;
+    }
 
     /*
    查询单位-分部字典,并标注在途项目现有的分部

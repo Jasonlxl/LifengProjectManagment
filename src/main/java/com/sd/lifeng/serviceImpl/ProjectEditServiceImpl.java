@@ -6,11 +6,16 @@ import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.project.EditProjectDetailVO;
+import com.sd.lifeng.vo.project.ProjectSourceVO;
+import com.sd.lifeng.vo.project.ProjectTimelineVO;
+import com.sd.lifeng.vo.project.ProjectUnitPartVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +80,126 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             result.put("msg","项目更新失败");
             result.put("data",new JSONObject());
         }
+        return result;
+    }
+
+    /*
+   查询项目已选择的静态资源
+   */
+    public JSONObject queryProjectSource(String projectHash){
+        JSONObject result = new JSONObject();
+        List<Map<String, Object>> list = projectDAO.querySourceforProject(projectHash);
+        if(list == null || list.size() == 0){
+            result.put("data", new JSONObject());
+        }else{
+            JSONArray array = new JSONArray();
+            for(int i=0;i<list.size();i++){
+                JSONObject source = new JSONObject();
+                source.put("source_type",list.get(i).get("source_type"));
+                array.add(source);
+            }
+            result.put("data",array);
+        }
+        result.put("code","0");
+        result.put("msg","success");
+        return result;
+    }
+
+    /*
+    编辑静态资源方法
+     */
+    public JSONObject editProjectSource(ProjectSourceVO projectSourceVO){
+        JSONObject result = new JSONObject();
+        int res;
+        //先清空原有静态资源
+        projectDAO.deleteSourceforProject(projectSourceVO.getProjectHash());
+        //确认已清空
+        res = projectDAO.querySourceforProject(projectSourceVO.getProjectHash()).size();
+        //返回原项目串码
+        JSONObject projectHash = new JSONObject();
+        projectHash.put("projectHash",projectSourceVO.getProjectHash());
+        result.put("data",projectHash);
+
+        if(res == 0){
+            //清空成功
+            try{
+                res = projectDAO.addProjectSourceBatch(projectSourceVO.getProjectHash(),projectSourceVO.getSourceList());
+                //插入成功
+                logger.info("成功更新"+res+"条资源");
+                result.put("code","0");
+                result.put("msg","成功更新"+res+"条资源");
+
+            }catch (Exception e){
+                logger.error(e.getMessage());
+                //插入异常
+                result.put("code","1003");
+                result.put("msg",e.getMessage());
+            }
+        }else{
+            result.put("code","1016");
+            result.put("msg","静态资源更新失败");
+        }
+
+        return result;
+    }
+
+    /*
+   查询项目已选择的时间线资源
+   */
+    public JSONObject queryProjectTimeline(String projectHash){
+        JSONObject result = new JSONObject();
+        List<Map<String, Object>> list = projectDAO.queryTimelineforProject(projectHash);
+        if(list == null || list.size() == 0){
+            result.put("data", new JSONObject());
+        }else{
+            JSONArray array = new JSONArray();
+            for(int i=0;i<list.size();i++){
+                JSONObject source = new JSONObject();
+                source.put("timeline_type",list.get(i).get("timeline_type"));
+                array.add(source);
+            }
+            result.put("data",array);
+        }
+        result.put("code","0");
+        result.put("msg","success");
+        return result;
+    }
+
+    /*
+    编辑时间线资源方法
+     */
+    public JSONObject editProjectTimeline(ProjectTimelineVO projectTimelineVO){
+        JSONObject result = new JSONObject();
+        int res;
+        //先清空原有时间线资源
+        projectDAO.deleteTimelineforProject(projectTimelineVO.getProjectHash());
+        //确认已清空
+        res = projectDAO.queryTimelineforProject(projectTimelineVO.getProjectHash()).size();
+        //返回原项目串码
+        JSONObject projectHash = new JSONObject();
+        projectHash.put("projectHash",projectTimelineVO.getProjectHash());
+        result.put("data",projectHash);
+
+        if(res == 0){
+            //清空成功
+            try{
+                res = projectDAO.addProjectTimelineBatch(projectTimelineVO.getProjectHash(),projectTimelineVO.getTimelineList());
+                //插入成功
+                logger.info("成功更新"+res+"条资源");
+                result.put("code","0");
+                result.put("msg","成功更新"+res+"条资源");
+
+            }catch (Exception e){
+                logger.error(e.getMessage());
+                //插入异常
+                result.put("code","1003");
+                result.put("msg",e.getMessage());
+            }
+        }else{
+            result.put("code","1017");
+            result.put("msg","时间线资源更新失败");
+        }
+
         return result;
     }
 
@@ -180,6 +305,83 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         result.put("code","0");
         result.put("msg","success");
         result.put("data",finalObject);
+        return result;
+    }
+
+    /*
+    编辑工程单位-分部方法
+   */
+    public JSONObject editProjectUnitPart(ProjectUnitPartVO projectUnitPartVO){
+        JSONObject result = new JSONObject();
+        int res = 0;
+        //返回原项目串码
+        JSONObject projectHash = new JSONObject();
+        projectHash.put("projectHash",projectUnitPartVO.getProjectHash());
+        //先清空原有单位分部
+        projectDAO.deleteUnitPartforProject(projectUnitPartVO.getProjectHash());
+        //确认已清空
+        res = projectDAO.queryUnitforProject(projectUnitPartVO.getProjectHash()).size();
+
+        if(res == 0){
+            try{
+                res = projectDAO.addProjectUnitPartBatch(projectUnitPartVO.getProjectHash(),projectUnitPartVO.getUnit_part());
+                //插入成功，比对分部，清除多余分部的单元
+                //1、查询该项目pro_project_unit_part中的所有分部
+                List<Map<String, Object>> uplist = projectDAO.queryAllPartforProject(projectUnitPartVO.getProjectHash());
+                //2、查询该项目pro_project_cent_list中的所有分部
+                List<Map<String, Object>> clist = projectDAO.queryAllPartInCentforProject(projectUnitPartVO.getProjectHash());
+                //3、筛选出pro_project_cent_list中存在，但是pro_project_unit_part中不存在的分部
+                List<String> reslist = new ArrayList<>();
+                String part_name;
+                Boolean flag;
+                for (int i=0; i<clist.size(); i++){
+                    part_name = (String)clist.get(i).get("part_name");
+                    flag = true;
+                    for (int j=0; j<uplist.size(); j++){
+                        if(part_name.equals(uplist.get(j).get("part_name"))){
+                            //匹配到了分部
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if(flag){
+                        reslist.add(part_name);
+                    }
+                }
+
+                if (reslist == null || reslist.size() == 0){
+                    //无需清除
+                    logger.info("无需清除");
+                }else{
+                    logger.info("多余的分部:"+reslist);
+                    //4、清除pro_project_cent_list中多余的分部
+                    int rows = projectDAO.deleteSurplusProjectCentBatch(projectUnitPartVO.getProjectHash(),reslist);
+                    if(rows == reslist.size()){
+                        logger.info("清除成功");
+                    }else{
+                        logger.info("！！！警告：应清除"+reslist.size()+"条数据，但是实际清除了"+rows+"条数据");
+                    }
+                }
+
+                logger.info("成功更新"+res+"条单位-分部");
+                result.put("code","0");
+                result.put("msg","成功更新"+res+"条单位-分部");
+            }catch (SQLException e){
+                logger.error(e.getMessage());
+                //清除pro_project_cent_list中多余的分部异常
+                result.put("code","1018");
+                result.put("msg",e.getMessage());
+            }catch (Exception e){
+                logger.error(e.getMessage());
+                //插入异常
+                result.put("code","1007");
+                result.put("msg",e.getMessage());
+            }
+        }else{
+            result.put("code","1019");
+            result.put("msg","单位-分部更新失败");
+        }
+        result.put("data",projectHash);
         return result;
     }
 

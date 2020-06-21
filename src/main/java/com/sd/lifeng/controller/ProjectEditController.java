@@ -1,12 +1,12 @@
 package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
-import com.sd.lifeng.vo.project.EditProjectDetailVO;
-import com.sd.lifeng.vo.project.ProjectEditQueryUnitPartVO;
+import com.sd.lifeng.vo.project.*;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +68,7 @@ public class ProjectEditController {
      */
     @ResponseBody
     @PostMapping("/editprojectdetail")
+    
     public JSONObject editProjectDetail(@RequestBody @Valid EditProjectDetailVO editProjectDetailVO, BindingResult bindingResult){
         logger.info("【编辑在途项目详情】:");
 
@@ -94,15 +95,137 @@ public class ProjectEditController {
     }
 
     /*
+    查询项目已选择的静态资源
+     */
+    @ResponseBody
+    @PostMapping("/queryprojectsource")
+    public JSONObject queryProjectSource(@RequestBody @Valid QueryEditProjectVO queryEditProjectVO, BindingResult bindingResult){
+        logger.info("【查询在途项目已选择的静态资源】:");
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增在途项目已选择的静态资源】参数不正确，queryEditProjectVO={}", queryEditProjectVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //查询在途项目静态资源
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.queryProjectSource(queryEditProjectVO.getProjectHash());
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    编辑项目静态资源
+     */
+    @ResponseBody
+    @PostMapping("/editprojectsource")
+
+    public JSONObject editProjectSource(@RequestBody @Valid ProjectSourceVO projectSourceVO, BindingResult bindingResult){
+        logger.info("【编辑工程静态资源】:"+projectSourceVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【编辑工程静态资源】参数不正确，projectSourceVO={}",projectSourceVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //编辑静态资源
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectSourceVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.editProjectSource(projectSourceVO);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    查询项目已选择的时间线资源
+     */
+    @ResponseBody
+    @PostMapping("/queryprojecttimeline")
+    public JSONObject queryProjectTimeline(@RequestBody @Valid QueryEditProjectVO queryEditProjectVO, BindingResult bindingResult){
+        logger.info("【查询在途项目已选择的时间线资源】:");
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增在途项目已选择的时间线资源】参数不正确，queryEditProjectVO={}", queryEditProjectVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //查询在途项目时间线
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.queryProjectTimeline(queryEditProjectVO.getProjectHash());
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    编辑项目时间线资源
+     */
+    @ResponseBody
+    @PostMapping("/editprojecttimeline")
+
+    public JSONObject editProjectTimeline(@RequestBody @Valid ProjectTimelineVO projectTimelineVO, BindingResult bindingResult){
+        logger.info("【编辑工程时间线资源】:"+projectTimelineVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【编辑工程时间线资源】参数不正确，projectTimelineVO={}",projectTimelineVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //编辑时间线资源
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectTimelineVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.editProjectTimeline(projectTimelineVO);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
     查询单位-分部字典,并标注在途项目现有的分部
      */
     @ResponseBody
     @PostMapping("/queryprojectunitpart")
-    public JSONObject queryUnitPart(@RequestBody @Valid ProjectEditQueryUnitPartVO projectEditQueryUnitPartVO, BindingResult bindingResult){
+    public JSONObject queryUnitPart(@RequestBody @Valid QueryEditProjectVO queryEditProjectVO, BindingResult bindingResult){
         logger.info("【查询在途项目单位-分部】:");
 
         if(bindingResult.hasErrors()){
-            logger.error("【新增在途项目单位-分部】参数不正确，projectEditQueryUnitPartVO={}",projectEditQueryUnitPartVO);
+            logger.error("【新增在途项目单位-分部】参数不正确，queryEditProjectVO={}", queryEditProjectVO);
             throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
@@ -111,14 +234,43 @@ public class ProjectEditController {
         JSONObject response = new JSONObject();
 
         //先验证项目可否编辑
-        if(projectManageService.editCheck(projectEditQueryUnitPartVO.getProjectHash())){
+        if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
             response.put("code","1013");
             response.put("msg","该项目已启动或已竣工");
             logger.info("response :"+response);
             return response;
         }
 
-        response = projectEditService.queryUnitPart(projectEditQueryUnitPartVO.getProjectHash());
+        response = projectEditService.queryUnitPart(queryEditProjectVO.getProjectHash());
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    编辑项目单位-分部
+     */
+    @ResponseBody
+    @PostMapping("/editprojectunitpart")
+    public JSONObject editProjectUintPart(@RequestBody @Valid ProjectUnitPartVO projectUnitPartVO, BindingResult bindingResult){
+        logger.info("【编辑单位-分部】:"+projectUnitPartVO);
+
+        if(bindingResult.hasErrors()){
+            logger.error("【编辑单位-分部】参数不正确，projectUnitPartVO={}",projectUnitPartVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        //新增单元-分部
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectUnitPartVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.editProjectUnitPart(projectUnitPartVO);
         logger.info("response:"+response);
         return response;
     }

@@ -491,4 +491,120 @@ public class ProjectDAO {
         });
         return rows;
     }
+
+    /**
+     * @Description 查询pro_project_source表
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> querySourceforProject(String projecthash){
+        String sql="SELECT DISTINCT source_type from pro_project_source where projecthash=?";
+        Object[] params = new Object[] {projecthash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 清理pro_project_source表
+     * @Auther Jason
+     */
+    public int deleteSourceforProject(String projecthash){
+        String sql="DELETE FROM pro_project_source WHERE projecthash=?";
+        return jdbcTemplate.update(sql,projecthash);
+    }
+
+    /**
+     * @Description 查询pro_project_timeline表
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryTimelineforProject(String projecthash){
+        String sql="SELECT DISTINCT timeline_type from pro_project_timeline where projecthash=?";
+        Object[] params = new Object[] {projecthash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 清理pro_project_timeline表
+     * @Auther Jason
+     */
+    public int deleteTimelineforProject(String projecthash){
+        String sql="DELETE FROM pro_project_timeline WHERE projecthash=?";
+        return jdbcTemplate.update(sql,projecthash);
+    }
+
+    /**
+     * @Description 清理pro_project_unit_part表
+     * @Auther Jason
+     */
+    public int deleteUnitPartforProject(String projecthash){
+        String sql="DELETE FROM pro_project_unit_part WHERE projecthash=?";
+        return jdbcTemplate.update(sql,projecthash);
+    }
+
+    /**
+     * @Description 查询pro_project_unit_part表--分部
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryAllPartforProject(String projecthash){
+        String sql="SELECT part_name from pro_project_unit_part where projecthash=?";
+        Object[] params = new Object[] {projecthash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 查询pro_project_cent_list表--分部
+     * @Auther Jason
+     */
+    public List<Map<String,Object>> queryAllPartInCentforProject(String projecthash){
+        String sql="SELECT DISTINCT part_name from pro_project_cent_list where projecthash=?";
+        Object[] params = new Object[] {projecthash};
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        return list;
+    }
+
+    /**
+     * @Description 清除多余的单元pro_project_cent_list表
+     * @Auther Jason
+     */
+    public int deleteSurplusProjectCentBatch(String projectHash, List<String> list) throws SQLException,Exception{
+        String sql="DELETE FROM pro_project_cent_list WHERE projecthash=? and part_name=?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        int[] res;
+        try{
+            conn = jdbcTemplate.getDataSource().getConnection();
+            conn.setAutoCommit(false);
+            pstmt = conn.prepareStatement(sql);
+
+            String part_name;
+            for(int i = 0; i<list.size(); i++){
+                part_name = list.get(i);
+                pstmt.setString(1,projectHash);
+                pstmt.setString(2,part_name);
+                pstmt.addBatch();
+            }
+
+            res = pstmt.executeBatch();
+            conn.commit();
+        }catch(SQLException e){
+            conn.rollback();
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new SQLException(e);
+        }catch(Exception e){
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            throw new Exception(e);
+        }finally {
+            if(conn != null){
+                conn.close();
+            }
+            if(pstmt != null){
+                pstmt.close();
+            }
+        }
+        return res.length;
+    }
 }

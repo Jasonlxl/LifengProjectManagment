@@ -12,9 +12,9 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 public class RoleVO {
-    private Integer id;
+    private int id;
     @NotNull(message = "角色名称不能为空")
     private String roleName;
 
-    private Integer systemManager;
+    private int systemManager;
 }

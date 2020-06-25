@@ -37,10 +37,7 @@ public class ResourceTreeUtils {
         for(ResourceTreeVO c:childList){
             c.setChildren(getChildNodes(c.getId(), rootList));
         }
-        //子节点查找结束
-        if(childList.size() == 0){
-            return null;
-        }
+
         return childList;
     }
 

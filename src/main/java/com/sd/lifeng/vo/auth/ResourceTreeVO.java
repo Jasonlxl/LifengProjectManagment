@@ -2,6 +2,7 @@ package com.sd.lifeng.vo.auth;
 
 import lombok.Data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -12,5 +13,6 @@ public class ResourceTreeVO {
     private String path;
     private Integer parentId;
     private Integer resourceType;
-    private Set<ResourceTreeVO> children;
+    private int resourceOrder;
+    private Set<ResourceTreeVO> children = new HashSet<>();
 }

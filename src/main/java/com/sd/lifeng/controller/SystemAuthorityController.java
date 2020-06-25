@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
 import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
-import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.vo.ResultVO;
@@ -13,13 +12,11 @@ import com.sd.lifeng.vo.auth.RoleVO;
 import com.sd.lifeng.vo.auth.UserRoleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Objects;
 
 /**
  * @author bmr
@@ -65,12 +62,12 @@ public class SystemAuthorityController extends BaseController{
         return ResultVOUtil.success();
     }
 
-    @PostMapping("/addRoleResource")
+    @PostMapping("/editRoleResource")
     @VerifyToken
-    public ResultVO addUserRole(@RequestBody @Valid RoleResourceVO requestVO, BindingResult bindingResult){
+    public ResultVO editUserRole(@RequestBody @Valid RoleResourceVO requestVO, BindingResult bindingResult){
         logger.info("【为角色分配资源请求】参数列表：{}",requestVO);
         dealBindingResult("角色分配资源",requestVO,bindingResult);
-        systemAuthorityService.insertRoleResource(requestVO.getRoleId(),requestVO.getResourceId());
+        systemAuthorityService.editRoleResourceBatch(requestVO.getRoleId(),requestVO.getResourceIdList());
         return ResultVOUtil.success();
     }
 
@@ -96,14 +93,14 @@ public class SystemAuthorityController extends BaseController{
         return ResultVOUtil.success(systemAuthorityService.getRoleResources(roleId));
     }
 
-    @PostMapping("/removeRoleResource")
-    @VerifyToken
-    public ResultVO removeRoleResource(@RequestBody @Valid RoleResourceVO requestVO, BindingResult bindingResult){
-        logger.info("【移除角色资源请求】参数列表：{}",requestVO);
-        dealBindingResult("移除角色资源",requestVO,bindingResult);
-        systemAuthorityService.removeRoleResource(requestVO.getRoleId(),requestVO.getResourceId());
-        return ResultVOUtil.success();
-    }
+//    @PostMapping("/removeRoleResource")
+//    @VerifyToken
+//    public ResultVO removeRoleResource(@RequestBody @Valid RoleResourceVO requestVO, BindingResult bindingResult){
+//        logger.info("【移除角色资源请求】参数列表：{}",requestVO);
+//        dealBindingResult("移除角色资源",requestVO,bindingResult);
+//        systemAuthorityService.removeRoleResourceBatch(requestVO.getRoleId(),requestVO.getResourceIdList());
+//        return ResultVOUtil.success();
+//    }
 
     @PostMapping("/addRole")
     @VerifyToken
@@ -111,7 +108,8 @@ public class SystemAuthorityController extends BaseController{
         logger.info("【添加角色请求】参数列表：{}",requestVO);
         dealBindingResult("添加角色请求",requestVO,bindingResult);
         SystemRolesDO systemRolesDO =new SystemRolesDO();
-        BeanUtils.copyProperties(requestVO,systemRolesDO);
+        systemRolesDO.setRoleName(requestVO.getRoleName());
+        systemRolesDO.setSystemManager(requestVO.getSystemManager());
         systemAuthorityService.editRole(systemRolesDO);
         return ResultVOUtil.success();
     }
@@ -125,8 +123,9 @@ public class SystemAuthorityController extends BaseController{
 
         SystemRolesDO systemRolesDO =new SystemRolesDO();
         systemRolesDO.setId(jsonObject.getInteger("id"));
-        systemRolesDO.setRoleName(jsonObject.getString("role_name"));
-        systemRolesDO.setSystemManager(jsonObject.getInteger("system_manager"));
+        systemRolesDO.setRoleName(jsonObject.getString("roleName"));
+        systemRolesDO.setSystemManager(jsonObject.getInteger("systemManager"));
+        logger.info("【修改角色请求】参数列表：{}",systemRolesDO);
         systemAuthorityService.editRole(systemRolesDO);
         return ResultVOUtil.success();
     }
@@ -134,15 +133,12 @@ public class SystemAuthorityController extends BaseController{
     @PostMapping("/deleteRole")
     @VerifyToken
     public ResultVO deleteRole(@RequestBody JSONObject jsonObject){
-        if(jsonObject.getInteger("id") == null || jsonObject.getInteger("id") == 0){
+        int id = jsonObject.getInteger("id");
+        if( id == 0 ){
             return ResultVOUtil.error(ResultCodeEnum.PARAM_ERROR.getCode(),"角色id不能为空");
         }
 
-        SystemRolesDO systemRolesDO =new SystemRolesDO();
-        systemRolesDO.setId(jsonObject.getInteger("id"));
-        systemRolesDO.setRoleName(jsonObject.getString("role_name"));
-        systemRolesDO.setSystemManager(jsonObject.getInteger("system_manager"));
-        systemAuthorityService.editRole(systemRolesDO);
+        systemAuthorityService.deleteRole(id);
         return ResultVOUtil.success();
     }
 }

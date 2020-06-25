@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 public class SystemRolesDO {
-    private Integer id;
+    private int id;
     private String roleName;
-    private Integer systemManager;
+    private int systemManager;
 }

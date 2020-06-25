@@ -18,6 +18,7 @@ public class SystemResourceDO {
     private Integer resourceType;
     private Integer parentId;
     private String icon;
+    private int resourceOrder;
     private String createTime;
     private String updateTime;
     private Set<SystemResourceDO> children;

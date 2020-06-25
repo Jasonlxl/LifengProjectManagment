@@ -217,7 +217,7 @@ public class UserDAO {
     public int insertUser(UserDTO userDTO){
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql="insert into pro_users (telno,passwd,salt,realname,user_type_id,remark) values (?,?,?,?,?,?)";
-        int userID = jdbcTemplate.update(connection -> {
+        jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1,userDTO.getUserName());
             ps.setString(2,userDTO.getPassword());
@@ -227,7 +227,7 @@ public class UserDAO {
             ps.setString(6,userDTO.getRemark());
             return ps;
         },keyHolder);
-        return userID;
+        return Objects.requireNonNull(keyHolder.getKey()).intValue();
     }
 
     /**
@@ -303,13 +303,13 @@ public class UserDAO {
      */
     public LoginResponseVO getUserDetailById(int userId){
 
-        String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,ro.system_manager,re.id as resource_id,re.resource_name,re.resource_url,re.parent_id,re.icon,re.resource_type FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id where u.id = ?";
+        String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,ro.system_manager,re.id as resource_id,re.resource_name,re.resource_url,re.parent_id,re.icon,re.resource_type,re.resource_order FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id where u.id = ?";
         Object[] params = new Object[] { userId };
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
         if (CollectionUtils.isEmpty(list)){
             return null;
         }
-//        System.out.println(list);
+        System.out.println(list);
         Set<LoginResponseVO> responseVOList = new HashSet<>();
         for(Map<String,Object> map:list){
             LoginResponseVO responseVO=new LoginResponseVO();
@@ -347,6 +347,7 @@ public class UserDAO {
                         resourceTreeVO.setResourceType(Integer.parseInt(map.get("resource_type")+""));
                         resourceTreeVO.setParentId(Integer.parseInt(map.get("parent_id")+""));
                         resourceTreeVO.setIcon(map.get("icon")+"");
+                        resourceTreeVO.setResourceOrder((Integer) map.get("resource_order"));
                         resourceTreeVOSet.add(resourceTreeVO);
 
 
@@ -370,6 +371,7 @@ public class UserDAO {
                 resourceTreeVO.setParentId(resourceVO.getParentId());
                 resourceTreeVO.setPath(resourceVO.getResourceUrl());
                 resourceTreeVO.setResourceType(resourceVO.getResourceType());
+                resourceTreeVO.setResourceOrder(resourceVO.getResourceOrder());
                 resourceTreeVOSet.add(resourceTreeVO);
             });
 
@@ -379,7 +381,9 @@ public class UserDAO {
             resourceTreeVOSet.forEach(resourceTreeVO -> {
                 if(ResourceTreeUtils.isRootElement(resourceTreeVO)){
                     Set<ResourceTreeVO> voSet = ResourceTreeUtils.getChildNodes(resourceTreeVO.getId(),resourceTreeVOSet);
-                    resourceTreeVO.setChildren(voSet);
+                    if(voSet != null){
+                        resourceTreeVO.setChildren(voSet);
+                    }
                     loginResponseVO.getResourceVOList().add(resourceTreeVO);
                 }
             });

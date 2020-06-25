@@ -16,4 +16,5 @@ public class ResourceVO {
     private Integer parentId;
     private Integer resourceType;
     private String icon;
+    private int resourceOrder;
 }

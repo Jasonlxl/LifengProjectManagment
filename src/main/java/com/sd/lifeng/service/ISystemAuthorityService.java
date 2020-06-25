@@ -67,6 +67,16 @@ public interface ISystemAuthorityService {
     void insertRoleResource(int roleId,int resourceId);
 
     /**
+     * @description 为角色分配资源  批量
+     * @param roleId 角色id
+     * @param resourceIdList 资源id集合
+     * @author bmr
+     * @date 2020/5/26 : 17:27 :51
+     * @return void
+     */
+    void editRoleResourceBatch(int roleId, List<Integer> resourceIdList);
+
+    /**
      * @description 移除用户角色
      * @param userId 用户id
      * @param roleId 角色id
@@ -98,4 +108,14 @@ public interface ISystemAuthorityService {
      * @return void
      */
     void removeRoleResource(int roleId,int resourceId);
+
+    /**
+     * @description 移除角色资源  批量
+     * @param roleId 角色id
+     * @param resourceIdList 资源id集合
+     * @author bmr
+     * @date 2020/5/26 : 17:26 :51
+     * @return void
+     */
+    void removeRoleResourceBatch(int roleId,List<Integer> resourceIdList);
 }

@@ -42,6 +42,8 @@ public class ResourceDao {
             resourceVO.setResourceUrl(map.get("resource_url")+"");
             resourceVO.setParentId((Integer) map.get("parent_id"));
             resourceVO.setResourceType((Integer) map.get("resource_type"));
+            resourceVO.setResourceOrder((Integer) map.get("resource_order"));
+            resourceVO.setIcon(map.get("icon")+"");
             resourceVOList .add(resourceVO);
         }
         return resourceVOList ;

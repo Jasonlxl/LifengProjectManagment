@@ -35,8 +35,9 @@ public class RoleDao {
         List<RoleVO> roleVOList =new ArrayList<>();
         for(Map<String,Object> map:list){
             RoleVO roleVO=new RoleVO();
-            roleVO.setId(Integer.parseInt( map.get("id").toString()));
-            roleVO.setRoleName(map.get("role_name").toString());
+            roleVO.setId(Integer.parseInt( map.get("id")+""));
+            roleVO.setRoleName(map.get("role_name")+"");
+            roleVO.setSystemManager((Integer) map.get("system_manager"));
             roleVOList .add(roleVO);
         }
         return roleVOList ;
@@ -72,7 +73,7 @@ public class RoleDao {
      * @return int
      */
     public int addRole(SystemRolesDO rolesDO){
-        String sql="insert into pro_system_roles (rolen_name,system_manager) values (?,?)";
+        String sql="insert into pro_system_roles (role_name,system_manager) values (?,?)";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,rolesDO.getRoleName());
             preparedStatement.setInt(2,rolesDO.getSystemManager());
@@ -93,7 +94,7 @@ public class RoleDao {
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,rolesDO.getRoleName());
             preparedStatement.setInt(2,rolesDO.getSystemManager());
-            preparedStatement.setInt(2,rolesDO.getId());
+            preparedStatement.setInt(3,rolesDO.getId());
         });
         System.out.println(rows);
         return rows;
@@ -107,7 +108,7 @@ public class RoleDao {
      * @return int
      */
     public int deleteRole(int roleId){
-        String sql="delete pro_system_roles  where id =?";
+        String sql="delete from pro_system_roles  where id = ?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setInt(1,roleId);
         });

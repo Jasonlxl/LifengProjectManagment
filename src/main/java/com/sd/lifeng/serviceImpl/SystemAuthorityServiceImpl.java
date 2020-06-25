@@ -3,7 +3,6 @@ package com.sd.lifeng.serviceImpl;
 import com.sd.lifeng.dao.ResourceDao;
 import com.sd.lifeng.dao.RoleDao;
 import com.sd.lifeng.dao.SystemAuthorityDAO;
-import com.sd.lifeng.domain.SystemResourceDO;
 import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
@@ -52,7 +51,7 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
     @Override
     public void editRole(SystemRolesDO rolesDO) {
         int row;
-        if(rolesDO.getId() != null && rolesDO.getId() != 0){
+        if( rolesDO.getId() != 0){
             row=roleDao.updateRole(rolesDO);
         }else{
             row=roleDao.addRole(rolesDO);
@@ -102,6 +101,20 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
     }
 
     @Override
+    public void editRoleResourceBatch(int roleId, List<Integer> resourceIdList) {
+        int row;
+        try {
+            row=systemAuthorityDAO.editRoleResourceBatch(roleId,resourceIdList);
+        }catch (Exception e){
+            throw new LiFengException(ResultCodeEnum.SERVER_EXCEPTION.getCode(),e.getMessage());
+        }
+
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
+
+    @Override
     public void removeUserRole(int userId, int roleId) {
         int row;
         if(!systemAuthorityDAO.getUserRoleByUserIdAndRoleId(userId,roleId)){
@@ -137,6 +150,25 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
             throw new LiFengException(ResultCodeEnum.ROLE_RESOURCE_NOT_EXIST);
         }
         row=systemAuthorityDAO.removeRoleResource(roleId,resourceId);
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public void removeRoleResourceBatch(int roleId, List<Integer> resourceIdList) {
+        int row;
+        resourceIdList.forEach(resourceId->{
+            if(!systemAuthorityDAO.getRoleResourceByRoleIdAndResourceId(roleId,resourceId)){
+                throw new LiFengException(ResultCodeEnum.ROLE_RESOURCE_NOT_EXIST);
+            }
+        });
+        try {
+            row=systemAuthorityDAO.removeRoleResourceBatch(roleId,resourceIdList);
+        }catch (Exception e){
+            throw new LiFengException(ResultCodeEnum.SERVER_EXCEPTION.getCode(),e.getMessage());
+        }
+
         if(row == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }

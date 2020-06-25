@@ -3,6 +3,7 @@ package com.sd.lifeng.dao;
 import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.vo.auth.ResourceVO;
 import com.sd.lifeng.vo.auth.RoleVO;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +67,60 @@ public class SystemAuthorityDAO {
         });
         logger.info("【为角色分配资源】插入影响行数:{}",rows);
         return rows;
+    }
+
+    /**
+     * @description 为角色分配资源  批量
+     * @param roleId 角色id
+     * @param resourceIdList 资源id集合
+     * @author bmr
+     * @date 2020/5/26 : 17:21 :51
+     * @return int
+     */
+    public int editRoleResourceBatch(int roleId, List<Integer> resourceIdList) throws Exception{
+        int row;
+        String delSql = "delete from pro_system_role_resource where role_id = ?";
+        row = jdbcTemplate.update(delSql, preparedStatement -> {
+            preparedStatement.setInt(1,roleId);
+        });
+
+        if(resourceIdList.size() != 0){
+            String sql="insert into pro_system_role_resource (role_id,resource_id) values (?,?)";
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+
+            int[] res = new int[0];
+            try{
+                conn = jdbcTemplate.getDataSource().getConnection();
+                conn.setAutoCommit(false);
+                pstmt = conn.prepareStatement(sql);
+
+
+                for (int resourceId : resourceIdList) {
+                    pstmt.setInt(1, roleId);
+                    pstmt.setInt(2, resourceId);
+                    pstmt.addBatch();
+                }
+
+                res = pstmt.executeBatch();
+                conn.commit();
+            }catch(Exception e){
+                assert conn != null;
+                conn.rollback();
+                e.printStackTrace();
+                logger.error(e.getMessage());
+            } finally {
+                if(conn != null){
+                    conn.close();
+                }
+                if(pstmt != null){
+                    pstmt.close();
+                }
+            }
+            row = res.length;
+        }
+
+        return row;
     }
 
     /**
@@ -187,5 +245,50 @@ public class SystemAuthorityDAO {
         });
         logger.info("【移除角色资源】影响行数:{}",rows);
         return rows;
+    }
+
+    /**
+     * @description 移除角色资源  批量
+     * @param roleId 角色id
+     * @param resourceIdList  资源id集合
+     * @author bmr
+     * @date 2020/5/26 : 17:21 :51
+     * @return int
+     */
+    public int removeRoleResourceBatch(int roleId, List<Integer> resourceIdList) throws SQLException {
+        String sql="DELETE FROM pro_system_role_resource where role_id=? and resource_id=?";
+
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+
+        int[] res = new int[0];
+        try{
+            conn = jdbcTemplate.getDataSource().getConnection();
+            conn.setAutoCommit(false);
+            pstmt = conn.prepareStatement(sql);
+
+
+            for (int resourceId : resourceIdList) {
+                pstmt.setInt(1, roleId);
+                pstmt.setInt(2, resourceId);
+                pstmt.addBatch();
+            }
+
+            res = pstmt.executeBatch();
+            conn.commit();
+        }catch(Exception e){
+            assert conn != null;
+            conn.rollback();
+            e.printStackTrace();
+            logger.error(e.getMessage());
+        } finally {
+            if(conn != null){
+                conn.close();
+            }
+            if(pstmt != null){
+                pstmt.close();
+            }
+        }
+        return res.length;
     }
 }

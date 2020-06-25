@@ -29,6 +29,7 @@ public interface ISystemAuthorityService {
      */
     List<ResourceVO> getResourceList();
 
+
     /**
      * @description 编辑系统角色
      * @param rolesDO
@@ -36,6 +37,14 @@ public interface ISystemAuthorityService {
      * @date 2020/5/25 : 8:59 :51
      */
     void editRole(SystemRolesDO rolesDO);
+
+    /**
+     * @description 删除系统角色
+     * @param roleId 角色id
+     * @author bmr
+     * @date 2020/5/25 : 8:59 :51
+     */
+    void deleteRole(int roleId);
 
     /**
      * @description 为用户分配角色

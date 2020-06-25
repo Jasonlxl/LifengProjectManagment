@@ -4,18 +4,16 @@ import com.sd.lifeng.domain.RegisterDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.UserAuditEnum;
-import com.sd.lifeng.service.ICommonService;
-import com.sd.lifeng.service.ITokenService;
+import com.sd.lifeng.util.ResourceTreeUtils;
+import com.sd.lifeng.vo.auth.ResourceTreeVO;
 import com.sd.lifeng.vo.user.LoginResponseVO;
 import com.sd.lifeng.vo.user.RegisterResponseVO;
 import com.sd.lifeng.vo.auth.ResourceVO;
 import com.sd.lifeng.vo.auth.RoleVO;
 import com.sd.lifeng.vo.user.UserListVO;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -36,6 +34,9 @@ public class UserDAO {
 
     @Autowired
     private SystemAuthorityDAO authorityDAO;
+
+    @Autowired
+    private ResourceDao resourceDao;
 
     /**
      * @description 获取传递过来的用户是否为系统管理员
@@ -277,7 +278,7 @@ public class UserDAO {
 
             if(isManage){
                 //管理员返回所有资源
-                List<ResourceVO> resourceList=authorityDAO.getResourceList();
+                List<ResourceVO> resourceList=resourceDao.getResourceList();
                 for(ResourceVO resourceVO:resourceList){
                     userListVO.getResourceList().add(resourceVO);
                 }
@@ -295,7 +296,7 @@ public class UserDAO {
      */
     public LoginResponseVO getUserDetailById(int userId){
 
-        String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,ro.system_manager,re.id as resource_id,re.resource_name,re.resource_url FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id where u.id = ?";
+        String sql = "SELECT u.*,types.type,types.typename,ro.id as role_id,ro.role_name,ro.system_manager,re.id as resource_id,re.resource_name,re.resource_url,re.parent_id,re.icon,re.resource_type FROM pro_users u LEFT JOIN pro_types types ON types.id=u.user_type_id LEFT JOIN pro_system_user_role ur ON  ur.user_id=u.id LEFT JOIN pro_system_roles ro ON ro.id=ur.role_id LEFT JOIN pro_system_role_resource rr ON rr.role_id=ro.id LEFT JOIN pro_system_resource re ON re.id=rr.resource_id where u.id = ?";
         Object[] params = new Object[] { userId };
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
         if (CollectionUtils.isEmpty(list)){
@@ -313,7 +314,12 @@ public class UserDAO {
             responseVO.setUserTypeName(map.get("typename").toString());
             responseVOList.add(responseVO);
         }
+
+
+
+        Set<ResourceTreeVO> resourceTreeVOSet = new HashSet<>();
         for (LoginResponseVO responseVO : responseVOList){
+
             for(Map<String,Object> map:list){
                 int id=Integer.parseInt(map.get("id").toString());
                 if(responseVO.getUserId() == id){
@@ -327,18 +333,34 @@ public class UserDAO {
                     }
 
                     if(map.get("resource_id") != null){
-                        ResourceVO resourceVO=new ResourceVO();
-                        resourceVO.setId(Integer.parseInt(map.get("resource_id").toString()));
-                        resourceVO.setResourceName(map.get("resource_name").toString());
-                        resourceVO.setResourceUrl(map.get("resource_url").toString());
-                        responseVO.getResourceVOList().add(resourceVO);
+                        ResourceTreeVO resourceTreeVO=new ResourceTreeVO();
+                        resourceTreeVO.setId(Integer.parseInt(map.get("resource_id")+""));
+                        resourceTreeVO.setName(map.get("resource_name")+"");
+                        resourceTreeVO.setPath(map.get("resource_url")+"");
+                        resourceTreeVO.setResourceType(Integer.parseInt(map.get("resource_type")+""));
+                        resourceTreeVO.setParentId(Integer.parseInt(map.get("parent_id")+""));
+                        resourceTreeVO.setIcon(map.get("icon")+"");
+                        resourceTreeVOSet.add(resourceTreeVO);
+
+
                     }
 
                 }
             }
         }
 
-        return responseVOList.iterator().next() ;
+        //构建资源树
+        LoginResponseVO loginResponseVO =responseVOList.iterator().next();
+        resourceTreeVOSet.forEach(resourceTreeVO -> {
+            if(ResourceTreeUtils.isRootElement(resourceTreeVO)){
+                Set<ResourceTreeVO> voSet = ResourceTreeUtils.getChildNodes(resourceTreeVO.getId(),resourceTreeVOSet);
+                resourceTreeVO.setChildren(voSet);
+                loginResponseVO.getResourceVOList().add(resourceTreeVO);
+            }
+        });
+
+
+        return loginResponseVO ;
     }
 
 
@@ -375,5 +397,6 @@ public class UserDAO {
         });
         return rows;
     }
+
 
 }

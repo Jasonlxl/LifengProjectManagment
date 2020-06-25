@@ -1,6 +1,6 @@
 package com.sd.lifeng.vo.user;
 
-import com.sd.lifeng.vo.auth.ResourceVO;
+import com.sd.lifeng.vo.auth.ResourceTreeVO;
 import com.sd.lifeng.vo.auth.RoleVO;
 import lombok.Data;
 
@@ -32,5 +32,6 @@ public class LoginResponseVO {
 
     private Set<RoleVO> roleVOList = new HashSet<>();
 
-    private Set<ResourceVO> resourceVOList = new HashSet<>();
+    private Set<ResourceTreeVO> resourceVOList = new HashSet<>();
+
 }

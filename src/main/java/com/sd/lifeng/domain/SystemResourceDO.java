@@ -2,6 +2,8 @@ package com.sd.lifeng.domain;
 
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * @author bmr
  * @Classname SystemResourceDO
@@ -14,6 +16,9 @@ public class SystemResourceDO {
     private String resourceName;
     private String resourceUrl;
     private Integer resourceType;
+    private Integer parentId;
+    private String icon;
     private String createTime;
     private String updateTime;
+    private Set<SystemResourceDO> children;
 }

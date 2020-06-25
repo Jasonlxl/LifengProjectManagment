@@ -2,6 +2,8 @@ package com.sd.lifeng.vo.auth;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * @author bmr
  * @Classname RoleVO
@@ -11,6 +13,8 @@ import lombok.Data;
 @Data
 public class RoleVO {
     private Integer id;
+    @NotNull(message = "角色名称不能为空")
     private String roleName;
+
     private Integer systemManager;
 }

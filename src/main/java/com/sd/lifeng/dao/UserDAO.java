@@ -1,6 +1,7 @@
 package com.sd.lifeng.dao;
 
 import com.sd.lifeng.domain.RegisterDO;
+import com.sd.lifeng.domain.SystemResourceDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.dto.UserDTO;
 import com.sd.lifeng.enums.UserAuditEnum;
@@ -13,6 +14,7 @@ import com.sd.lifeng.vo.auth.RoleVO;
 import com.sd.lifeng.vo.user.UserListVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -38,6 +40,12 @@ public class UserDAO {
     @Autowired
     private ResourceDao resourceDao;
 
+    @Autowired
+    private RoleDao roleDao;
+
+//    @Autowired
+//    private UserDAO userDAO;
+
     /**
      * @description 获取传递过来的用户是否为系统管理员
      * @author bmr
@@ -47,8 +55,7 @@ public class UserDAO {
      */
     public boolean isSystemManagerByUserId(Integer userId) {
         boolean flag = false;
-        LoginResponseVO responseVO=this.getUserDetailById(userId);
-        Set<RoleVO> roleVOList=responseVO.getRoleVOList();
+        List<RoleVO> roleVOList= authorityDAO.getRolesByUserId(userId);
         if(CollectionUtils.isEmpty(roleVOList)){
             return false;
         }
@@ -351,13 +358,33 @@ public class UserDAO {
 
         //构建资源树
         LoginResponseVO loginResponseVO =responseVOList.iterator().next();
-        resourceTreeVOSet.forEach(resourceTreeVO -> {
-            if(ResourceTreeUtils.isRootElement(resourceTreeVO)){
-                Set<ResourceTreeVO> voSet = ResourceTreeUtils.getChildNodes(resourceTreeVO.getId(),resourceTreeVOSet);
-                resourceTreeVO.setChildren(voSet);
-                loginResponseVO.getResourceVOList().add(resourceTreeVO);
-            }
-        });
+        if(isSystemManagerByUserId(loginResponseVO.getUserId())){
+            //如果是系统管理员，返回所有的资源树
+            List<ResourceVO> resourceVOList = resourceDao.getResourceList();
+            resourceTreeVOSet.clear();
+            resourceVOList.forEach(resourceVO -> {
+                ResourceTreeVO resourceTreeVO =new ResourceTreeVO();
+                resourceTreeVO.setId(resourceVO.getId());
+                resourceTreeVO.setName(resourceVO.getResourceName());
+                resourceTreeVO.setIcon(resourceVO.getIcon());
+                resourceTreeVO.setParentId(resourceVO.getParentId());
+                resourceTreeVO.setPath(resourceVO.getResourceUrl());
+                resourceTreeVO.setResourceType(resourceVO.getResourceType());
+                resourceTreeVOSet.add(resourceTreeVO);
+            });
+
+        }
+
+        if(resourceTreeVOSet.size() != 0){
+            resourceTreeVOSet.forEach(resourceTreeVO -> {
+                if(ResourceTreeUtils.isRootElement(resourceTreeVO)){
+                    Set<ResourceTreeVO> voSet = ResourceTreeUtils.getChildNodes(resourceTreeVO.getId(),resourceTreeVOSet);
+                    resourceTreeVO.setChildren(voSet);
+                    loginResponseVO.getResourceVOList().add(resourceTreeVO);
+                }
+            });
+        }
+
 
 
         return loginResponseVO ;

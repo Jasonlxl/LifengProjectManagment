@@ -37,9 +37,11 @@ public class ResourceDao {
         List<ResourceVO> resourceVOList =new ArrayList<>();
         for(Map<String,Object> map:list){
             ResourceVO resourceVO=new ResourceVO();
-            resourceVO.setId(Integer.parseInt( map.get("id").toString()));
-            resourceVO.setResourceName(map.get("resource_name").toString());
-            resourceVO.setResourceUrl(map.get("resource_url").toString());
+            resourceVO.setId(Integer.parseInt( map.get("id")+""));
+            resourceVO.setResourceName(map.get("resource_name")+"");
+            resourceVO.setResourceUrl(map.get("resource_url")+"");
+            resourceVO.setParentId((Integer) map.get("parent_id"));
+            resourceVO.setResourceType((Integer) map.get("resource_type"));
             resourceVOList .add(resourceVO);
         }
         return resourceVOList ;

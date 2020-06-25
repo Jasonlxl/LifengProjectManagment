@@ -2,15 +2,18 @@ package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
+import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.ISystemAuthorityService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.vo.ResultVO;
 import com.sd.lifeng.vo.auth.RoleResourceVO;
+import com.sd.lifeng.vo.auth.RoleVO;
 import com.sd.lifeng.vo.auth.UserRoleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -99,6 +102,47 @@ public class SystemAuthorityController extends BaseController{
         logger.info("【移除角色资源请求】参数列表：{}",requestVO);
         dealBindingResult("移除角色资源",requestVO,bindingResult);
         systemAuthorityService.removeRoleResource(requestVO.getRoleId(),requestVO.getResourceId());
+        return ResultVOUtil.success();
+    }
+
+    @PostMapping("/addRole")
+    @VerifyToken
+    public ResultVO addRole(@RequestBody RoleVO requestVO, BindingResult bindingResult){
+        logger.info("【添加角色请求】参数列表：{}",requestVO);
+        dealBindingResult("添加角色请求",requestVO,bindingResult);
+        SystemRolesDO systemRolesDO =new SystemRolesDO();
+        BeanUtils.copyProperties(requestVO,systemRolesDO);
+        systemAuthorityService.editRole(systemRolesDO);
+        return ResultVOUtil.success();
+    }
+
+    @PostMapping("/updateRole")
+    @VerifyToken
+    public ResultVO updateRole(@RequestBody JSONObject jsonObject){
+        if(jsonObject.getInteger("id") == null || jsonObject.getInteger("id") == 0){
+            return ResultVOUtil.error(ResultCodeEnum.PARAM_ERROR.getCode(),"角色id不能为空");
+        }
+
+        SystemRolesDO systemRolesDO =new SystemRolesDO();
+        systemRolesDO.setId(jsonObject.getInteger("id"));
+        systemRolesDO.setRoleName(jsonObject.getString("role_name"));
+        systemRolesDO.setSystemManager(jsonObject.getInteger("system_manager"));
+        systemAuthorityService.editRole(systemRolesDO);
+        return ResultVOUtil.success();
+    }
+
+    @PostMapping("/deleteRole")
+    @VerifyToken
+    public ResultVO deleteRole(@RequestBody JSONObject jsonObject){
+        if(jsonObject.getInteger("id") == null || jsonObject.getInteger("id") == 0){
+            return ResultVOUtil.error(ResultCodeEnum.PARAM_ERROR.getCode(),"角色id不能为空");
+        }
+
+        SystemRolesDO systemRolesDO =new SystemRolesDO();
+        systemRolesDO.setId(jsonObject.getInteger("id"));
+        systemRolesDO.setRoleName(jsonObject.getString("role_name"));
+        systemRolesDO.setSystemManager(jsonObject.getInteger("system_manager"));
+        systemAuthorityService.editRole(systemRolesDO);
         return ResultVOUtil.success();
     }
 }

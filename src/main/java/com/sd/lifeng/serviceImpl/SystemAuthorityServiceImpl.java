@@ -1,6 +1,9 @@
 package com.sd.lifeng.serviceImpl;
 
+import com.sd.lifeng.dao.ResourceDao;
+import com.sd.lifeng.dao.RoleDao;
 import com.sd.lifeng.dao.SystemAuthorityDAO;
+import com.sd.lifeng.domain.SystemResourceDO;
 import com.sd.lifeng.domain.SystemRolesDO;
 import com.sd.lifeng.domain.UserDO;
 import com.sd.lifeng.enums.ResultCodeEnum;
@@ -27,27 +30,44 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
     private SystemAuthorityDAO systemAuthorityDAO;
 
     @Autowired
+    private RoleDao roleDao;
+
+    @Autowired
+    private ResourceDao resourceDao;
+
+    @Autowired
     private IUserCategoryService userCategoryService;
 
     @Override
     public List<RoleVO> getRoleList() {
-        return systemAuthorityDAO.getRoleList();
+        return roleDao.getRoleList();
     }
 
     @Override
     public List<ResourceVO> getResourceList() {
-        return systemAuthorityDAO.getResourceList();
+        return resourceDao.getResourceList();
     }
+
 
     @Override
     public void editRole(SystemRolesDO rolesDO) {
         int row;
         if(rolesDO.getId() != null && rolesDO.getId() != 0){
-            row=systemAuthorityDAO.updateRole(rolesDO);
+            row=roleDao.updateRole(rolesDO);
         }else{
-            row=systemAuthorityDAO.addRole(rolesDO);
+            row=roleDao.addRole(rolesDO);
         }
 
+        if(row == 0){
+            throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
+        }
+    }
+
+    @Override
+    public void deleteRole(int roleId) {
+        int row;
+
+        row = roleDao.deleteRole(roleId);
         if(row == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);
         }
@@ -61,7 +81,7 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
             throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
         }
 
-        SystemRolesDO rolesDO = systemAuthorityDAO.getRoleById(roleId);
+        SystemRolesDO rolesDO = roleDao.getRoleById(roleId);
         if(rolesDO == null){
             throw new LiFengException(ResultCodeEnum.ROLE_NOT_EXIST);
         }
@@ -104,7 +124,7 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
 
     @Override
     public List<ResourceVO> getRoleResources(int roleId) {
-        if((systemAuthorityDAO.getRoleById(roleId)) == null){
+        if((roleDao.getRoleById(roleId)) == null){
             throw new LiFengException(ResultCodeEnum.ROLE_NOT_EXIST);
         }
         return systemAuthorityDAO.getResourcesByRoleId(roleId);

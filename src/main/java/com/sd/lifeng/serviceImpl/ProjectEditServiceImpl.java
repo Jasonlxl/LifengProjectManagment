@@ -5,10 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
-import com.sd.lifeng.vo.project.EditProjectDetailVO;
-import com.sd.lifeng.vo.project.ProjectSourceVO;
-import com.sd.lifeng.vo.project.ProjectTimelineVO;
-import com.sd.lifeng.vo.project.ProjectUnitPartVO;
+import com.sd.lifeng.vo.project.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -382,6 +379,90 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             result.put("msg","单位-分部更新失败");
         }
         result.put("data",projectHash);
+        return result;
+    }
+
+    /*
+   查询项目已选择的单元
+   */
+    public JSONObject queryProjectCent(String projectHash){
+        JSONObject result = new JSONObject();
+        //先查单元表中该项目的所有分部
+        List<Map<String, Object>> partlist = projectDAO.queryAllPartInCentforProject(projectHash);
+        if(partlist == null || partlist.size() == 0){
+            result.put("data", new JSONArray());
+        }else{
+            JSONArray finalarray = new JSONArray();
+            for(int i=0;i<partlist.size();i++){
+                JSONObject object = new JSONObject();
+                object.put("id",i+1);
+                object.put("part_name",partlist.get(i).get("part_name"));
+
+                //再查分部下的单元
+                List<Map<String, Object>> centlist = projectDAO.queryCentInPartforProject(projectHash,(String) partlist.get(i).get("part_name"));
+                JSONArray centArray = new JSONArray();
+                for(int j=0;j<centlist.size();j++){
+                    JSONObject centObject = new JSONObject();
+                    centObject.put("id",j+1);
+                    centObject.put("projecthash",centlist.get(j).get("projecthash"));
+                    centObject.put("part_name",centlist.get(j).get("part_name"));
+                    centObject.put("cent_name",centlist.get(j).get("cent_name"));
+                    centObject.put("centhash",centlist.get(j).get("centhash"));
+                    centObject.put("cent_type",centlist.get(j).get("cent_type"));
+                    centArray.add(centObject);
+                }
+                object.put("children",centArray);
+
+                finalarray.add(object);
+            }
+            result.put("data",finalarray);
+        }
+        result.put("code","0");
+        result.put("msg","success");
+        return result;
+    }
+
+    /*
+   单条删除已选择的项目单元
+   */
+    public JSONObject deleteProjectCent(String centHash){
+        JSONObject result = new JSONObject();
+        int i = projectDAO.deleteCentforProject(centHash);
+        if(i == 1){
+            result.put("code","0");
+            result.put("msg","success");
+        }else{
+            result.put("code","1020");
+            result.put("msg","单元删除失败");
+        }
+        return result;
+    }
+
+    /*
+   单项增加项目单元
+   */
+    public JSONObject addProjectCent(ProjectAddCentVO projectAddCentVO){
+        JSONObject result = new JSONObject();
+        int res = 0;
+
+        try{
+            res = projectDAO.addCentforProjectBatch(projectAddCentVO.getProjectHash(),projectAddCentVO.getCent());
+            //新增成功
+            logger.info("成功新增"+res+"条分部-单元");
+            result.put("code","0");
+            result.put("msg","成功新增"+res+"条分部-单元");
+            //返回原项目串码
+            JSONObject projectHash = new JSONObject();
+            projectHash.put("projectHash",projectAddCentVO.getProjectHash());
+
+            result.put("data",projectHash);
+        }catch (Exception e){
+            logger.error(e.getMessage());
+            //插入异常
+            result.put("code","1021");
+            result.put("msg",e.getMessage());
+        }
+
         return result;
     }
 

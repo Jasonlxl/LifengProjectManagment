@@ -68,7 +68,7 @@ public class ProjectEditController {
      */
     @ResponseBody
     @PostMapping("/editprojectdetail")
-    
+
     public JSONObject editProjectDetail(@RequestBody @Valid EditProjectDetailVO editProjectDetailVO, BindingResult bindingResult){
         logger.info("【编辑在途项目详情】:");
 
@@ -271,6 +271,96 @@ public class ProjectEditController {
         }
 
         response = projectEditService.editProjectUnitPart(projectUnitPartVO);
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    查询在途项目单元列表
+     */
+    @ResponseBody
+    @PostMapping("/queryprojectcent")
+    public JSONObject queryProjectCent(@RequestBody @Valid QueryEditProjectVO queryEditProjectVO, BindingResult bindingResult){
+        logger.info("【查询在途项目单元列表】:");
+
+        if(bindingResult.hasErrors()){
+            logger.error("【新增在途项目单元列表】参数不正确，queryEditProjectVO={}", queryEditProjectVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //查询在途项目单元列表
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.queryProjectCent(queryEditProjectVO.getProjectHash());
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    单条删除已选择的项目单元
+     */
+    @ResponseBody
+    @PostMapping("/deleteprojectcent")
+    public JSONObject deleteProjectCent(@RequestBody @Valid DeleteCentVO deleteCentVO, BindingResult bindingResult){
+        logger.info("【单条删除已选择的项目单元】:");
+
+        if(bindingResult.hasErrors()){
+            logger.error("【单条删除已选择的项目单元】参数不正确，deleteCentVO={}", deleteCentVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //查询在途项目单元列表
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(deleteCentVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.deleteProjectCent(deleteCentVO.getCentHash());
+        logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    单项增加项目单元
+     */
+    @ResponseBody
+    @PostMapping("/addprojectcent")
+    public JSONObject addProjectCent(@RequestBody @Valid ProjectAddCentVO projectAddCentVO, BindingResult bindingResult){
+        logger.info("【单项增加项目单元】:");
+
+        if(bindingResult.hasErrors()){
+            logger.error("【单项增加项目单元】参数不正确，projectAddCentVO={}", projectAddCentVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //查询在途项目单元列表
+        JSONObject response = new JSONObject();
+
+        //先验证项目可否编辑
+        if(projectManageService.editCheck(projectAddCentVO.getProjectHash())){
+            response.put("code","1013");
+            response.put("msg","该项目已启动或已竣工");
+            logger.info("response :"+response);
+            return response;
+        }
+
+        response = projectEditService.addProjectCent(projectAddCentVO);
         logger.info("response:"+response);
         return response;
     }

@@ -392,6 +392,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         List<Map<String, Object>> partlist = projectDAO.queryAllPartInCentforProject(projectHash);
         JSONArray finalarray = new JSONArray();
         if(partlist == null || partlist.size() == 0){
+            //没有记录直接返回所有分部
             partlist = projectDAO.queryProjectPartList(projectHash);
             for(int i=0; i<partlist.size(); i++){
                 JSONObject object = new JSONObject();
@@ -401,6 +402,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
                 finalarray.add(object);
             }
         }else{
+            //有记录，先处理有单元的分部
             for(int i=0;i<partlist.size();i++){
                 JSONObject object = new JSONObject();
                 object.put("id",i+1);
@@ -422,6 +424,34 @@ public class ProjectEditServiceImpl implements IProjectEditService {
                 object.put("children",centArray);
 
                 finalarray.add(object);
+            }
+
+            //再处理没有单元的分部
+            //查回来所有的分部
+            partlist = projectDAO.queryProjectPartList(projectHash);
+            String part_name;
+            Boolean flag;
+            //遍历分部
+            for(int i=0; i<partlist.size(); i++){
+                part_name = (String) partlist.get(i).get("part_name");
+                //默认分部需要加入最终集合
+                flag = true;
+                //遍历已完成的集合
+                for(int j=0; j<finalarray.size(); j++){
+                    if(part_name.equals(finalarray.getJSONObject(j).getString("part_name"))){
+                        //找到了相同的分部，设置标识为false
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    //标识为真，则说明需要加入集合
+                    JSONObject object = new JSONObject();
+                    object.put("id",i+1);
+                    object.put("part_name",partlist.get(i).get("part_name"));
+                    object.put("children",new JSONArray());
+                    finalarray.add(object);
+                }
             }
         }
         result.put("data",finalarray);

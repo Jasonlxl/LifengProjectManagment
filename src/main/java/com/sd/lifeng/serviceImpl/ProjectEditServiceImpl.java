@@ -393,7 +393,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         JSONArray finalarray = new JSONArray();
         if(partlist == null || partlist.size() == 0){
             partlist = projectDAO.queryProjectPartList(projectHash);
-            for(int i=0; i<=partlist.size(); i++){
+            for(int i=0; i<partlist.size(); i++){
                 JSONObject object = new JSONObject();
                 object.put("id",i+1);
                 object.put("part_name",partlist.get(i).get("part_name"));

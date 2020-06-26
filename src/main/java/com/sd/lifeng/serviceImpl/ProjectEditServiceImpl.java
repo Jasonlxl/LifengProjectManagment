@@ -390,10 +390,17 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         JSONObject result = new JSONObject();
         //先查单元表中该项目的所有分部
         List<Map<String, Object>> partlist = projectDAO.queryAllPartInCentforProject(projectHash);
+        JSONArray finalarray = new JSONArray();
         if(partlist == null || partlist.size() == 0){
-            result.put("data", new JSONArray());
+            partlist = projectDAO.queryProjectPartList(projectHash);
+            for(int i=0; i<=partlist.size(); i++){
+                JSONObject object = new JSONObject();
+                object.put("id",i+1);
+                object.put("part_name",partlist.get(i).get("part_name"));
+                object.put("children",new JSONArray());
+                finalarray.add(object);
+            }
         }else{
-            JSONArray finalarray = new JSONArray();
             for(int i=0;i<partlist.size();i++){
                 JSONObject object = new JSONObject();
                 object.put("id",i+1);
@@ -416,8 +423,8 @@ public class ProjectEditServiceImpl implements IProjectEditService {
 
                 finalarray.add(object);
             }
-            result.put("data",finalarray);
         }
+        result.put("data",finalarray);
         result.put("code","0");
         result.put("msg","success");
         return result;

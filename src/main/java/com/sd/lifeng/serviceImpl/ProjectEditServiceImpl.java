@@ -52,6 +52,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
                 projectDetail.put("rolename",list.get(i).get("rolename"));
                 projectDetail.put("createdate",list.get(i).get("createdate"));
                 projectDetail.put("project_addr",list.get(i).get("project_addr"));
+                projectDetail.put("status",list.get(i).get("status"));
                 array.add(projectDetail);
             }
             result.put("data",array);
@@ -67,6 +68,10 @@ public class ProjectEditServiceImpl implements IProjectEditService {
    */
     public JSONObject editProjectDetail(EditProjectDetailVO editProjectDetailVO){
         JSONObject result = new JSONObject();
+        //判断项目名称是否重复
+        if(projectDAO.getRecordByProjectNameAndRoleId(editProjectDetailVO.getProjectName())){
+            throw new LiFengException(ProjectReturnEnum.REPEAT_CHECK_ERROR);
+        }
         int rows = projectDAO.updateProjectDetail(editProjectDetailVO);
         if(rows>0){
             result.put("code","0");

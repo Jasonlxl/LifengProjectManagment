@@ -230,4 +230,26 @@ public class ProjectManageController {
         logger.info("response:"+response);
         return response;
     }
+
+    /*
+    项目状态操作接口
+     */
+    @ResponseBody
+    @PostMapping("/status")
+    public JSONObject status(@RequestBody @Valid ProjectStatusVO projectStatusVO, BindingResult bindingResult){
+        logger.info("【操作状态】 :"+projectStatusVO);
+        JSONObject response = new JSONObject();
+
+        if(bindingResult.hasErrors()){
+            logger.error("【操作状态】参数不正确，projectStatusVO={}",projectStatusVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //尝试操作状态
+        response = projectManageService.changeStatus(projectStatusVO);
+
+        logger.info("response :"+response);
+        return response;
+    }
 }

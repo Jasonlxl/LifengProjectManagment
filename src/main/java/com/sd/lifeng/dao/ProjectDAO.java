@@ -47,6 +47,22 @@ public class ProjectDAO {
     }
 
     /**
+     * @Description 根据项目名称查询项目表
+     * @param projectName,roleId 项目名称
+     * @Auther Jason
+     * @Date 2020/5/23 : 22:59 :51
+     * @Return com.sd.lifeng.dao.ProjectDAO
+     */
+    public boolean getRecordByProjectNameAndRoleId(String projectName){
+        String sql="select id from pro_project_details where project_name = ?";
+        Object[] params = new Object[] { projectName};
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        //存在记录
+        return list.size() > 0;
+    }
+
+    /**
      * @Description 根据项目串号判断是否可以编辑
      * @param projectHash 项目串号
      */
@@ -712,5 +728,18 @@ public class ProjectDAO {
             }
         }
         return res.length;
+    }
+
+    /**
+     * @Description 更新项目状态pro_project_details
+     * @Auther Jason
+     */
+    public int updateProjectStatus(String projectHash, int status){
+        String sql="update pro_project_details set status=? where projecthash=?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setInt(1,status);
+            preparedStatement.setString(2,projectHash);
+        });
+        return rows;
     }
 }

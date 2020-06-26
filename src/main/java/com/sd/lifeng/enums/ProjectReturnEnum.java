@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 public enum ProjectReturnEnum {
     SUCCESS("0","success"),
-    REPEAT_CHECK_ERROR("J1001","已存在该项目，请勿重复添加"),
+    REPEAT_CHECK_ERROR("J1001","项目名称已存在，请核实"),
     NO_SOURCE_MODEL_ERROR("J1002","系统内尚未配置静态资源"),
     INSERT_SQL_EXCEPTION("J1003","数据操作异常"),
     NO_TIMELINE_MODEL_ERROR("J1004","系统内尚未配置时间线资源"),
@@ -24,7 +24,8 @@ public enum ProjectReturnEnum {
     PROJECT_TIMELINE_UPDATE_ERROR("J1017","项目时间线资源更新失败"),
     PROJECT_CENT_PREDO_ERROR("J1018","单元预处理异常"),
     PROJECT_UNIT_PART_UPDATE_ERROR("J1019","项目单位-分部更新失败"),
-    CENT_DELETE_ERROR("J1020","单元移除失败");
+    CENT_DELETE_ERROR("J1020","单元移除失败"),
+    PROJECT_STATUS_UPDATE_ERROR("J1021","项目状态操作失败");
     private String code;
     private String msg;
 

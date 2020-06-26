@@ -63,4 +63,9 @@ public interface IProjectManageService {
     新增工程分部-单元方法
    */
     public JSONObject addProjectPartCent(ProjectPartCentVO projectPartCentVO);
+
+    /*
+    操作状态方法
+     */
+    public JSONObject changeStatus(ProjectStatusVO projectStatusVO);
 }

@@ -31,7 +31,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
     根据项目名称、甲方角色id判重
      */
     public boolean repeatCheck(String projectName, int roleId){
-        return projectDAO.getRecordByProjectNameAndRoleId(projectName,roleId);
+        return projectDAO.getRecordByProjectNameAndRoleId(projectName);
     }
 
     /*
@@ -336,6 +336,22 @@ public class ProjectManageServiceImpl implements IProjectManageService {
             logger.error(e.getMessage());
             //插入异常
             throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
+        }
+        return result;
+    }
+
+    /*
+    操作状态方法
+     */
+    public JSONObject changeStatus(ProjectStatusVO projectStatusVO){
+        JSONObject result = new JSONObject();
+        int rows = projectDAO.updateProjectStatus(projectStatusVO.getProjectHash(),projectStatusVO.getStatus());
+        if(rows>0){
+            result.put("code","0");
+            result.put("msg","success");
+            result.put("data",new JSONObject());
+        }else{
+            throw new LiFengException(ProjectReturnEnum.PROJECT_STATUS_UPDATE_ERROR);
         }
         return result;
     }

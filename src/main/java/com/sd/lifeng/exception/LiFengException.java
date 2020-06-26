@@ -1,5 +1,6 @@
 package com.sd.lifeng.exception;
 
+import com.sd.lifeng.enums.ProjectReturnEnum;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import lombok.Getter;
 
@@ -24,5 +25,15 @@ public class LiFengException extends RuntimeException{
 
     public LiFengException(String message) {
         super(message);
+    }
+
+    public LiFengException(ProjectReturnEnum projectReturnEnum){
+        super(projectReturnEnum.getMsg());
+        this.code=projectReturnEnum.getCode();
+    }
+
+    public LiFengException(ProjectReturnEnum projectReturnEnum, String message){
+        super(message);
+        this.code=projectReturnEnum.getCode();
     }
 }

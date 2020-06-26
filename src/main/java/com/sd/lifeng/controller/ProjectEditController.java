@@ -2,6 +2,7 @@ package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
+import com.sd.lifeng.enums.ProjectReturnEnum;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
@@ -35,30 +36,17 @@ public class ProjectEditController {
     */
     @ResponseBody
     @PostMapping("/queryeditproject")
-    public JSONObject queryEditProject(@RequestBody JSONObject req){
-        logger.info("【查询可编辑项目列表】:"+req);
-        JSONObject response = new JSONObject();
+    public JSONObject queryEditProject(@RequestBody @Valid QueryEditProjectListVO queryEditProjectListVO, BindingResult bindingResult){
+        logger.info("【查询可编辑项目列表】:"+queryEditProjectListVO);
 
-        String userId;
-        try{
-            userId = req.getString("userId");
-
-            if(StringUtils.isBlank(userId)){
-                response.put("code","1014");
-                response.put("msg","用户ID不得为空");
-                logger.info("response:"+response);
-                return response;
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-            logger.error(e.getMessage());
-            response.put("code","1010");
-            response.put("msg","数据包解析异常");
-            logger.info("response:"+response);
-            return response;
+        if(bindingResult.hasErrors()){
+            logger.error("【查询可编辑项目列表】参数不正确，queryEditProjectListVO={}",queryEditProjectListVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
-        //查询时间线资源
-        response = projectEditService.queryEditProject(userId);
+
+        //查询可编辑项目列表
+        JSONObject response = projectEditService.queryEditProject(queryEditProjectListVO.getUserId());
         logger.info("response:"+response);
         return response;
     }
@@ -79,14 +67,11 @@ public class ProjectEditController {
         }
 
         //编辑在途项目详情
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(editProjectDetailVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","项目不存在");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.editProjectDetail(editProjectDetailVO);
@@ -109,14 +94,11 @@ public class ProjectEditController {
         }
 
         //查询在途项目静态资源
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.queryProjectSource(queryEditProjectVO.getProjectHash());
@@ -140,14 +122,11 @@ public class ProjectEditController {
         }
 
         //编辑静态资源
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectSourceVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.editProjectSource(projectSourceVO);
@@ -170,14 +149,11 @@ public class ProjectEditController {
         }
 
         //查询在途项目时间线
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.queryProjectTimeline(queryEditProjectVO.getProjectHash());
@@ -201,14 +177,11 @@ public class ProjectEditController {
         }
 
         //编辑时间线资源
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectTimelineVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.editProjectTimeline(projectTimelineVO);
@@ -231,14 +204,11 @@ public class ProjectEditController {
         }
 
         //查询在途项目单元-分部
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.queryUnitPart(queryEditProjectVO.getProjectHash());
@@ -260,14 +230,11 @@ public class ProjectEditController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增单元-分部
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectUnitPartVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.editProjectUnitPart(projectUnitPartVO);
@@ -290,14 +257,11 @@ public class ProjectEditController {
         }
 
         //查询在途项目单元列表
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(queryEditProjectVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.queryProjectCent(queryEditProjectVO.getProjectHash());
@@ -320,14 +284,11 @@ public class ProjectEditController {
         }
 
         //查询在途项目单元列表
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(deleteCentVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.deleteProjectCent(deleteCentVO.getCentHash());
@@ -350,14 +311,11 @@ public class ProjectEditController {
         }
 
         //查询在途项目单元列表
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectAddCentVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectEditService.addProjectCent(projectAddCentVO);

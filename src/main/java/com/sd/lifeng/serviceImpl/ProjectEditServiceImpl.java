@@ -3,6 +3,8 @@ package com.sd.lifeng.serviceImpl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
+import com.sd.lifeng.enums.ProjectReturnEnum;
+import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.project.*;
@@ -73,9 +75,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             projecthash.put("projectHash",editProjectDetailVO.getProjectHash());
             result.put("data",projecthash);
         }else{
-            result.put("code","1015");
-            result.put("msg","项目更新失败");
-            result.put("data",new JSONObject());
+            throw new LiFengException(ProjectReturnEnum.PROJECT_DETAIL_UPDATE_ERROR);
         }
         return result;
     }
@@ -129,12 +129,11 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             }catch (Exception e){
                 logger.error(e.getMessage());
                 //插入异常
-                result.put("code","1003");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
             }
         }else{
-            result.put("code","1016");
-            result.put("msg","静态资源更新失败");
+            //有残余数据，不得更新
+            throw new LiFengException(ProjectReturnEnum.PROJECT_SOURCE_UPDATE_ERROR);
         }
 
         return result;
@@ -189,12 +188,11 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             }catch (Exception e){
                 logger.error(e.getMessage());
                 //插入异常
-                result.put("code","1003");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
             }
         }else{
-            result.put("code","1017");
-            result.put("msg","时间线资源更新失败");
+            //有残余数据，不得更新
+            throw new LiFengException(ProjectReturnEnum.PROJECT_TIMELINE_UPDATE_ERROR);
         }
 
         return result;
@@ -366,17 +364,15 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             }catch (SQLException e){
                 logger.error(e.getMessage());
                 //清除pro_project_cent_list中多余的分部异常
-                result.put("code","1018");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.PROJECT_CENT_PREDO_ERROR);
             }catch (Exception e){
                 logger.error(e.getMessage());
                 //插入异常
-                result.put("code","1007");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
             }
         }else{
-            result.put("code","1019");
-            result.put("msg","单位-分部更新失败");
+            //有残余数据，不得更新
+            throw new LiFengException(ProjectReturnEnum.PROJECT_UNIT_PART_UPDATE_ERROR);
         }
         result.put("data",projectHash);
         return result;
@@ -432,8 +428,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             result.put("code","0");
             result.put("msg","success");
         }else{
-            result.put("code","1020");
-            result.put("msg","单元删除失败");
+            throw new LiFengException(ProjectReturnEnum.CENT_DELETE_ERROR);
         }
         return result;
     }
@@ -459,8 +454,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         }catch (Exception e){
             logger.error(e.getMessage());
             //插入异常
-            result.put("code","1021");
-            result.put("msg",e.getMessage());
+            throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
         }
 
         return result;

@@ -7,16 +7,17 @@ import com.sd.lifeng.enums.ProjectReturnEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
+import com.sd.lifeng.util.JSONArraySortUtil;
 import com.sd.lifeng.vo.project.*;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.Collator;
+import java.util.*;
 
 @Service
 public class ProjectEditServiceImpl implements IProjectEditService {
@@ -454,7 +455,11 @@ public class ProjectEditServiceImpl implements IProjectEditService {
                 }
             }
         }
-        result.put("data",finalarray);
+
+        JSONArraySortUtil sort = new JSONArraySortUtil();
+        JSONArray res = sort.jsonArraySort(finalarray,"part_name");
+
+        result.put("data",res);
         result.put("code","0");
         result.put("msg","success");
         return result;

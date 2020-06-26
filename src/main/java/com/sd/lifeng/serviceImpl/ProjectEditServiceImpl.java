@@ -69,7 +69,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
     public JSONObject editProjectDetail(EditProjectDetailVO editProjectDetailVO){
         JSONObject result = new JSONObject();
         //判断项目名称是否重复
-        if(projectDAO.getRecordByProjectNameAndRoleId(editProjectDetailVO.getProjectName())){
+        if(projectDAO.getRecordByProjectNameAndRoleId(editProjectDetailVO.getProjectName(),editProjectDetailVO.getProjectHash())){
             throw new LiFengException(ProjectReturnEnum.REPEAT_CHECK_ERROR);
         }
         int rows = projectDAO.updateProjectDetail(editProjectDetailVO);

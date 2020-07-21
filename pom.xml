@@ -108,6 +108,7 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!--junit测试-->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

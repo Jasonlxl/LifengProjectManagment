@@ -2,6 +2,7 @@ package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
+import com.sd.lifeng.dao.UserDAO;
 import com.sd.lifeng.service.IUserCategoryService;
 import com.sd.lifeng.util.ResultVOUtil;
 import com.sd.lifeng.vo.ResultVO;
@@ -9,6 +10,7 @@ import com.sd.lifeng.vo.user.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,9 @@ public class UserCategoryController extends BaseController{
 
     @Autowired
     private IUserCategoryService userCategoryService;
+
+    @Autowired
+    private UserDAO userDAO;
 
 
     @PostMapping("/register")
@@ -63,6 +68,10 @@ public class UserCategoryController extends BaseController{
         dealBindingResult("登录",requestVO,bindingResult);
 
         LoginResponseVO loginResponseVO =userCategoryService.login(requestVO.getUserName(),requestVO.getPassword());
+        //如果存在手机设备token  进行更新
+        if(!StringUtils.isEmpty(requestVO.getClientid())){
+            userDAO.changeDeviceToken(loginResponseVO.getUserId(),requestVO.getClientid());
+        }
         logger.info("【登录请求】返回数据:{}",loginResponseVO);
         return ResultVOUtil.success(loginResponseVO);
     }

@@ -84,6 +84,9 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
         if(rolesDO == null){
             throw new LiFengException(ResultCodeEnum.ROLE_NOT_EXIST);
         }
+        //先移除该用户分配的角色，然后添加进去新的角色
+        systemAuthorityDAO.removeUserRole(userId,roleId);
+
 
         //删除已分配的角色
         systemAuthorityDAO.removeUserRoleByUserId(userId);

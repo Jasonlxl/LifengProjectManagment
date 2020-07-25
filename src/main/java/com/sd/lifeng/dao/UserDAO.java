@@ -157,12 +157,12 @@ public class UserDAO {
         registerDO.setStatus((Integer) list.get(0).get("status"));
         return registerDO;
     }
-    
+
     /**
      * @Description 获取用户注册列表
      * @param status 审核状态 不填默认查询全部
      * @Auther bmr
-     * @Date 2020/5/24 : 8:48 :51 
+     * @Date 2020/5/24 : 8:48 :51
      * @Return java.util.List<com.sd.lifeng.vo.user.RegisterResponseVO>
      */
     public List<RegisterResponseVO> getRegisterList(int status){
@@ -233,7 +233,7 @@ public class UserDAO {
     /**
      * @Description 获取用户列表
      * @Auther bmr
-     * @Date 2020/5/24 : 8:49 :51 
+     * @Date 2020/5/24 : 8:49 :51
      * @Return java.util.List<com.sd.lifeng.vo.user.UserListVO>
      */
     public Set<UserListVO> getUserList(){
@@ -407,6 +407,23 @@ public class UserDAO {
         String sql="update pro_users set passwd =? where id =?";
         int rows=jdbcTemplate.update(sql, preparedStatement -> {
             preparedStatement.setString(1,password);
+            preparedStatement.setInt(2,userId);
+        });
+        return rows;
+    }
+
+    /**
+     * @Description 更改用户手机设备token值
+     * @param userId 用户id
+     * @param clientId 设备token值
+     * @Auther bmr
+     * @Date 2020/7/24 : 9:08 :51
+     * @Return int
+     */
+    public int changeDeviceToken(int userId,String clientId){
+        String sql="update pro_users set clientid =? where id =?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setString(1,clientId);
             preparedStatement.setInt(2,userId);
         });
         return rows;

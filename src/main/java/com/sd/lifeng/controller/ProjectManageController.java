@@ -2,11 +2,11 @@ package com.sd.lifeng.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.annotion.VerifyToken;
+import com.sd.lifeng.enums.ProjectReturnEnum;
 import com.sd.lifeng.enums.ResultCodeEnum;
 import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.project.*;
-import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +44,7 @@ public class ProjectManageController {
 
         //先搜索是否有同一个甲方的同名项目
         if(projectManageService.repeatCheck(newProjectVO.getProjectName(),newProjectVO.getRoleId())){
-            response.put("code","1001");
-            response.put("msg","已存在该项目，请勿重复添加");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.REPEAT_CHECK_ERROR);
         }
 
         //尝试新增项目
@@ -85,14 +82,11 @@ public class ProjectManageController {
         }
 
         //新增静态资源
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectSourceVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectManageService.addProjectSource(projectSourceVO);
@@ -127,14 +121,11 @@ public class ProjectManageController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增时间线资源
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectTimelineVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectManageService.addProjectTimeline(projectTimelineVO);
@@ -169,14 +160,11 @@ public class ProjectManageController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增单元-分部
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectUnitPartVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectManageService.addProjectUnitPart(projectUnitPartVO);
@@ -202,30 +190,17 @@ public class ProjectManageController {
      */
     @ResponseBody
     @PostMapping("/queryprojectpartlist")
-    public JSONObject queryProjectPartList(@RequestBody JSONObject req){
-        logger.info("【查询某项目所有分部】:"+req);
-        JSONObject response = new JSONObject();
-        String projectHash;
-        try{
-            projectHash = req.getString("projectHash");
+    public JSONObject queryProjectPartList(@RequestBody @Valid QueryEditProjectVO queryEditProjectVO, BindingResult bindingResult){
+        logger.info("【查询某项目所有分部】:");
 
-            if(StringUtils.isBlank(projectHash)){
-                response.put("code","1009");
-                response.put("msg","项目唯一串码不得为空");
-                logger.info("response:"+response);
-                return response;
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-            logger.error(e.getMessage());
-            response.put("code","1010");
-            response.put("msg","数据包解析异常");
-            logger.info("response:"+response);
-            return response;
+        if(bindingResult.hasErrors()){
+            logger.error("【查询某项目所有分部】参数不正确，queryEditProjectVO={}", queryEditProjectVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
 
         //查询某项目所有分部
-        response = projectManageService.queryProjectPartList(projectHash);
+        JSONObject response = projectManageService.queryProjectPartList(queryEditProjectVO.getProjectHash());
         logger.info("response:"+response);
         return response;
     }
@@ -244,18 +219,37 @@ public class ProjectManageController {
                     Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         //新增分部-单元
-        JSONObject response = new JSONObject();
+        JSONObject response;
 
         //先验证项目可否编辑
         if(projectManageService.editCheck(projectPartCentVO.getProjectHash())){
-            response.put("code","1013");
-            response.put("msg","该项目已启动或已竣工");
-            logger.info("response :"+response);
-            return response;
+            throw new LiFengException(ProjectReturnEnum.PROJECT_CANNOT_EDIT_ERROR);
         }
 
         response = projectManageService.addProjectPartCent(projectPartCentVO);
         logger.info("response:"+response);
+        return response;
+    }
+
+    /*
+    项目状态操作接口
+     */
+    @ResponseBody
+    @PostMapping("/status")
+    public JSONObject status(@RequestBody @Valid ProjectStatusVO projectStatusVO, BindingResult bindingResult){
+        logger.info("【操作状态】 :"+projectStatusVO);
+        JSONObject response = new JSONObject();
+
+        if(bindingResult.hasErrors()){
+            logger.error("【操作状态】参数不正确，projectStatusVO={}",projectStatusVO);
+            throw new LiFengException(ResultCodeEnum.PARAM_ERROR.getCode(),
+                    Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+
+        //尝试操作状态
+        response = projectManageService.changeStatus(projectStatusVO);
+
+        logger.info("response :"+response);
         return response;
     }
 }

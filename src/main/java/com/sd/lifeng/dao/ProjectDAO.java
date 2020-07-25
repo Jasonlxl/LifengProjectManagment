@@ -31,15 +31,31 @@ public class ProjectDAO {
     private JdbcTemplate jdbcTemplate;
 
     /**
-     * @Description 根据项目名称，角色id查询项目表
-     * @param projectName,roleId 项目名称，角色id
+     * @Description 根据项目名称，projectHash判断是否重名
+     * @param projectName,roleId 项目名称，projectHash
      * @Auther Jason
      * @Date 2020/5/23 : 22:59 :51
      * @Return com.sd.lifeng.dao.ProjectDAO
      */
-    public boolean getRecordByProjectNameAndRoleId(String projectName,int roleId){
-        String sql="select id from pro_project_details where project_name = ? and role_id = ?";
-        Object[] params = new Object[] { projectName,roleId};
+    public boolean getRecordByProjectNameAndRoleId(String projectName,String projectHash){
+        String sql="select id from pro_project_details where project_name = ? and projecthash != ?";
+        Object[] params = new Object[] { projectName,projectHash};
+
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
+        //存在记录
+        return list.size() > 0;
+    }
+
+    /**
+     * @Description 根据项目名称查询项目表
+     * @param projectName,roleId 项目名称
+     * @Auther Jason
+     * @Date 2020/5/23 : 22:59 :51
+     * @Return com.sd.lifeng.dao.ProjectDAO
+     */
+    public boolean getRecordByProjectNameAndRoleId(String projectName){
+        String sql="select id from pro_project_details where project_name = ?";
+        Object[] params = new Object[] { projectName};
 
         List<Map<String, Object>> list = jdbcTemplate.queryForList(sql,params);
         //存在记录
@@ -712,5 +728,18 @@ public class ProjectDAO {
             }
         }
         return res.length;
+    }
+
+    /**
+     * @Description 更新项目状态pro_project_details
+     * @Auther Jason
+     */
+    public int updateProjectStatus(String projectHash, int status){
+        String sql="update pro_project_details set status=? where projecthash=?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setInt(1,status);
+            preparedStatement.setString(2,projectHash);
+        });
+        return rows;
     }
 }

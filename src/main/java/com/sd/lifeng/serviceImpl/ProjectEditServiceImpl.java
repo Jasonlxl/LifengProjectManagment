@@ -3,18 +3,21 @@ package com.sd.lifeng.serviceImpl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
+import com.sd.lifeng.enums.ProjectReturnEnum;
+import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectEditService;
 import com.sd.lifeng.service.IProjectManageService;
+import com.sd.lifeng.util.JSONArraySortUtil;
 import com.sd.lifeng.vo.project.*;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.Collator;
+import java.util.*;
 
 @Service
 public class ProjectEditServiceImpl implements IProjectEditService {
@@ -50,6 +53,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
                 projectDetail.put("rolename",list.get(i).get("rolename"));
                 projectDetail.put("createdate",list.get(i).get("createdate"));
                 projectDetail.put("project_addr",list.get(i).get("project_addr"));
+                projectDetail.put("status",list.get(i).get("status"));
                 array.add(projectDetail);
             }
             result.put("data",array);
@@ -65,6 +69,10 @@ public class ProjectEditServiceImpl implements IProjectEditService {
    */
     public JSONObject editProjectDetail(EditProjectDetailVO editProjectDetailVO){
         JSONObject result = new JSONObject();
+        //判断项目名称是否重复
+        if(projectDAO.getRecordByProjectNameAndRoleId(editProjectDetailVO.getProjectName(),editProjectDetailVO.getProjectHash())){
+            throw new LiFengException(ProjectReturnEnum.REPEAT_CHECK_ERROR);
+        }
         int rows = projectDAO.updateProjectDetail(editProjectDetailVO);
         if(rows>0){
             result.put("code","0");
@@ -73,9 +81,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             projecthash.put("projectHash",editProjectDetailVO.getProjectHash());
             result.put("data",projecthash);
         }else{
-            result.put("code","1015");
-            result.put("msg","项目更新失败");
-            result.put("data",new JSONObject());
+            throw new LiFengException(ProjectReturnEnum.PROJECT_DETAIL_UPDATE_ERROR);
         }
         return result;
     }
@@ -129,12 +135,11 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             }catch (Exception e){
                 logger.error(e.getMessage());
                 //插入异常
-                result.put("code","1003");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
             }
         }else{
-            result.put("code","1016");
-            result.put("msg","静态资源更新失败");
+            //有残余数据，不得更新
+            throw new LiFengException(ProjectReturnEnum.PROJECT_SOURCE_UPDATE_ERROR);
         }
 
         return result;
@@ -189,12 +194,11 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             }catch (Exception e){
                 logger.error(e.getMessage());
                 //插入异常
-                result.put("code","1003");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
             }
         }else{
-            result.put("code","1017");
-            result.put("msg","时间线资源更新失败");
+            //有残余数据，不得更新
+            throw new LiFengException(ProjectReturnEnum.PROJECT_TIMELINE_UPDATE_ERROR);
         }
 
         return result;
@@ -366,17 +370,15 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             }catch (SQLException e){
                 logger.error(e.getMessage());
                 //清除pro_project_cent_list中多余的分部异常
-                result.put("code","1018");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.PROJECT_CENT_PREDO_ERROR);
             }catch (Exception e){
                 logger.error(e.getMessage());
                 //插入异常
-                result.put("code","1007");
-                result.put("msg",e.getMessage());
+                throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
             }
         }else{
-            result.put("code","1019");
-            result.put("msg","单位-分部更新失败");
+            //有残余数据，不得更新
+            throw new LiFengException(ProjectReturnEnum.PROJECT_UNIT_PART_UPDATE_ERROR);
         }
         result.put("data",projectHash);
         return result;
@@ -389,10 +391,19 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         JSONObject result = new JSONObject();
         //先查单元表中该项目的所有分部
         List<Map<String, Object>> partlist = projectDAO.queryAllPartInCentforProject(projectHash);
+        JSONArray finalarray = new JSONArray();
         if(partlist == null || partlist.size() == 0){
-            result.put("data", new JSONArray());
+            //没有记录直接返回所有分部
+            partlist = projectDAO.queryProjectPartList(projectHash);
+            for(int i=0; i<partlist.size(); i++){
+                JSONObject object = new JSONObject();
+                object.put("id",i+1);
+                object.put("part_name",partlist.get(i).get("part_name"));
+                object.put("children",new JSONArray());
+                finalarray.add(object);
+            }
         }else{
-            JSONArray finalarray = new JSONArray();
+            //有记录，先处理有单元的分部
             for(int i=0;i<partlist.size();i++){
                 JSONObject object = new JSONObject();
                 object.put("id",i+1);
@@ -415,8 +426,40 @@ public class ProjectEditServiceImpl implements IProjectEditService {
 
                 finalarray.add(object);
             }
-            result.put("data",finalarray);
+
+            //再处理没有单元的分部
+            //查回来所有的分部
+            partlist = projectDAO.queryProjectPartList(projectHash);
+            String part_name;
+            Boolean flag;
+            //遍历分部
+            for(int i=0; i<partlist.size(); i++){
+                part_name = (String) partlist.get(i).get("part_name");
+                //默认分部需要加入最终集合
+                flag = true;
+                //遍历已完成的集合
+                for(int j=0; j<finalarray.size(); j++){
+                    if(part_name.equals(finalarray.getJSONObject(j).getString("part_name"))){
+                        //找到了相同的分部，设置标识为false
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    //标识为真，则说明需要加入集合
+                    JSONObject object = new JSONObject();
+                    object.put("id",i+1);
+                    object.put("part_name",partlist.get(i).get("part_name"));
+                    object.put("children",new JSONArray());
+                    finalarray.add(object);
+                }
+            }
         }
+
+        JSONArraySortUtil sort = new JSONArraySortUtil();
+        JSONArray res = sort.jsonArraySort(finalarray,"part_name");
+
+        result.put("data",res);
         result.put("code","0");
         result.put("msg","success");
         return result;
@@ -432,8 +475,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
             result.put("code","0");
             result.put("msg","success");
         }else{
-            result.put("code","1020");
-            result.put("msg","单元删除失败");
+            throw new LiFengException(ProjectReturnEnum.CENT_DELETE_ERROR);
         }
         return result;
     }
@@ -459,8 +501,7 @@ public class ProjectEditServiceImpl implements IProjectEditService {
         }catch (Exception e){
             logger.error(e.getMessage());
             //插入异常
-            result.put("code","1021");
-            result.put("msg",e.getMessage());
+            throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
         }
 
         return result;

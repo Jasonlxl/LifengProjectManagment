@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sd.lifeng.dao.ProjectDAO;
 import com.sd.lifeng.domain.ProjectDO;
+import com.sd.lifeng.enums.ProjectReturnEnum;
+import com.sd.lifeng.exception.LiFengException;
 import com.sd.lifeng.service.IProjectManageService;
 import com.sd.lifeng.vo.project.*;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
     根据项目名称、甲方角色id判重
      */
     public boolean repeatCheck(String projectName, int roleId){
-        return projectDAO.getRecordByProjectNameAndRoleId(projectName,roleId);
+        return projectDAO.getRecordByProjectNameAndRoleId(projectName);
     }
 
     /*
@@ -87,8 +89,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
 
         if(list == null || list.size() == 0){
             //静态资源为空
-            result.put("code","1002");
-            result.put("msg","系统内尚未配置静态资源");
+            throw new LiFengException(ProjectReturnEnum.NO_SOURCE_MODEL_ERROR);
         }else{
             JSONArray array = new JSONArray();
             for(int i = 0; i<list.size(); i++){
@@ -129,8 +130,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         }catch (Exception e){
             logger.error(e.getMessage());
             //插入异常
-            result.put("code","1003");
-            result.put("msg",e.getMessage());
+            throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
         }
         return result;
     }
@@ -145,8 +145,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
 
         if(list == null || list.size() == 0){
             //静态资源为空
-            result.put("code","1004");
-            result.put("msg","系统内尚未配置时间线资源");
+            throw new LiFengException(ProjectReturnEnum.NO_TIMELINE_MODEL_ERROR);
         }else{
             JSONArray array = new JSONArray();
             for(int i = 0; i<list.size(); i++){
@@ -187,8 +186,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         }catch (Exception e){
             logger.error(e.getMessage());
             //插入异常
-            result.put("code","1005");
-            result.put("msg",e.getMessage());
+            throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
         }
         return result;
     }
@@ -203,8 +201,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
 
         if(list == null || list.size() == 0){
             //未配置单位
-            result.put("code","1006");
-            result.put("msg","单位资源未配置");
+            throw new LiFengException(ProjectReturnEnum.NO_UNIT_PART_MODEL_ERROR);
         }else{
             //再查每个单位的所有分部
             JSONArray finalArray = new JSONArray();
@@ -251,8 +248,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         }catch (Exception e){
             logger.error(e.getMessage());
             //插入异常
-            result.put("code","1007");
-            result.put("msg",e.getMessage());
+            throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
         }
         return result;
     }
@@ -266,9 +262,8 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         List<Map<String, Object>> list = projectDAO.queryCent();
 
         if(list == null || list.size() == 0){
-            //静态资源为空
-            result.put("code","1008");
-            result.put("msg","系统内尚未配置单元模板");
+            //单元模板为空
+            throw new LiFengException(ProjectReturnEnum.NO_CENT_MODEL_ERROR);
         }else{
             JSONArray array = new JSONArray();
             for(int i = 0; i<list.size(); i++){
@@ -304,8 +299,7 @@ public class ProjectManageServiceImpl implements IProjectManageService {
 
         if(list == null || list.size() == 0){
             //单位-分部为空
-            result.put("code","1011");
-            result.put("msg","查询异常，该项目未添加任何单位-分部");
+            throw new LiFengException(ProjectReturnEnum.PROJECT_HAS_NO_PART_ERROR);
         }else{
             JSONArray array = new JSONArray();
             addPartName(list, array,0);
@@ -341,8 +335,23 @@ public class ProjectManageServiceImpl implements IProjectManageService {
         }catch (Exception e){
             logger.error(e.getMessage());
             //插入异常
-            result.put("code","1012");
-            result.put("msg",e.getMessage());
+            throw new LiFengException(ProjectReturnEnum.INSERT_SQL_EXCEPTION, e.getMessage());
+        }
+        return result;
+    }
+
+    /*
+    操作状态方法
+     */
+    public JSONObject changeStatus(ProjectStatusVO projectStatusVO){
+        JSONObject result = new JSONObject();
+        int rows = projectDAO.updateProjectStatus(projectStatusVO.getProjectHash(),projectStatusVO.getStatus());
+        if(rows>0){
+            result.put("code","0");
+            result.put("msg","success");
+            result.put("data",new JSONObject());
+        }else{
+            throw new LiFengException(ProjectReturnEnum.PROJECT_STATUS_UPDATE_ERROR);
         }
         return result;
     }

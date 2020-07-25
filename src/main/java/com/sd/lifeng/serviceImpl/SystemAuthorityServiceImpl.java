@@ -85,6 +85,10 @@ public class SystemAuthorityServiceImpl implements ISystemAuthorityService {
             throw new LiFengException(ResultCodeEnum.ROLE_NOT_EXIST);
         }
 
+        //删除已分配的角色
+        systemAuthorityDAO.removeUserRoleByUserId(userId);
+
+        //再插入新分配的角色
         row=systemAuthorityDAO.addUserRole(userId,roleId);
         if(row == 0){
             throw new LiFengException(ResultCodeEnum.DATA_BASE_UPDATE_ERROR);

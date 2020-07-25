@@ -141,6 +141,22 @@ public class SystemAuthorityDAO {
         return rows;
     }
 
+    /**
+     * @description 根据用户id移除用户角色
+     * @param userId 用户id
+     * @author bmr
+     * @date 2020/5/26 : 17:21 :51
+     * @return int
+     */
+    public int removeUserRoleByUserId(int userId){
+        String sql="DELETE FROM pro_system_user_role where user_id=?";
+        int rows=jdbcTemplate.update(sql, preparedStatement -> {
+            preparedStatement.setInt(1,userId);
+        });
+        logger.info("【移除用户所分配的所有角色】影响行数:{}",rows);
+        return rows;
+    }
+
 
 
     /**

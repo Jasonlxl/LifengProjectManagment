@@ -92,19 +92,40 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
     @Override
     public LoginResponseVO login(String userName, String password){
         UserDO userDO=userDAO.getUserByPhone(userName);
+
+        String finalPassword;
         if(userDO == null){
-            throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
+            //如果用户表中不存在  去查询注册表中的信息
+            RegisterDO registerUser = userDAO.getRegisterUserByPhone(userName);
+            if(registerUser == null){
+                throw new LiFengException(ResultCodeEnum.USER_NOT_EXIST);
+            }
+
+            finalPassword=DigestUtils.md5Hex(registerUser.getTelNo() + registerUser.getSalt() + password);
+            if(!finalPassword.equals(registerUser.getPassword())){
+                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR);
+            }
+
+            if(registerUser.getStatus() == 0){
+                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR.getCode(),"用户待审核，审核通过后可登陆");
+            }
+
+            if(registerUser.getStatus() == 2){
+                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR.getCode(),"用户审核被拒，审核通过后可登陆");
+            }
+
         }
-        String finalPassword=DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + password);
-        UserDO userDO1=userDAO.getUserByNamePassword(userName,finalPassword);
-        if(userDO1 == null){
+
+        finalPassword =  DigestUtils.md5Hex(userDO.getTelno() + userDO.getSalt() + password);
+
+        if(!finalPassword.equals(userDO.getPasswd())){
             throw new LiFengException(ResultCodeEnum.LOGIN_ERROR);
         }
 
         //生成jwt
         String token= tokenService.createToken(userDO.getId().toString());
 
-        LoginResponseVO responseVO=userDAO.getUserDetailById(userDO1.getId());
+        LoginResponseVO responseVO=userDAO.getUserDetailById(userDO.getId());
         responseVO.setToken(token);
 
         return responseVO;

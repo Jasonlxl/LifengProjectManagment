@@ -107,11 +107,11 @@ public class UserCategoryServiceImpl implements IUserCategoryService {
             }
 
             if(registerUser.getStatus() == 0){
-                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR.getCode(),"用户待审核，审核通过后可登陆");
+                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR.getCode(),"用户待审核，审核通过后可登录");
             }
 
             if(registerUser.getStatus() == 2){
-                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR.getCode(),"用户审核被拒，审核通过后可登陆");
+                throw new LiFengException(ResultCodeEnum.LOGIN_ERROR.getCode(),"用户审核被拒，审核通过后可登录");
             }
 
         }
